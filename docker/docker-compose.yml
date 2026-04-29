@@ -11,7 +11,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:-eventos_db}
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=en_US.UTF-8"
     ports:
-      - "127.0.0.1:5432:5432"  # Bind only to localhost in production
+      - "127.0.0.1:5433:5432"  # Bind only to localhost in production
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
@@ -54,10 +54,10 @@ services:
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-change_me}
       PGADMIN_CONFIG_SERVER_MODE: "False"
       PGADMIN_CONFIG_ENHANCED_COOKIE_PROTECTION: "True"
-      PGADMIN_CONFIG_COOKIE_SAMESITE: "Lax"
+      # PGADMIN_CONFIG_COOKIE_SAMESITE: "Lax"
       PGADMIN_CONFIG_COOKIE_DEFAULT: "False"
     ports:
-      - "127.0.0.1:5050:80"  # Bind only to localhost - DO NOT expose in production
+      - "127.0.0.1:5051:80"  # Bind only to localhost - DO NOT expose in production
     volumes:
       - pgadmin_data:/var/lib/pgadmin
     depends_on:
@@ -66,7 +66,7 @@ services:
     networks:
       - eventos_net
     healthcheck:
-      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:80/misc/ping"]
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:5051/misc/ping"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -79,10 +79,10 @@ services:
         reservations:
           cpus: '0.25'
           memory: 128M
-    read_only: true
+    read_only: false # pgAdmin needs write access for sessions and config
     tmpfs: /var/run/pgadmin
-    security_opt:
-      - no-new-privileges:true
+    # security_opt:
+    #   - no-new-privileges:true
     logging:
       driver: "json-file"
       options:
@@ -94,7 +94,7 @@ services:
   # ── Backend Go API ────────────────────────────────────────────────────────
   backend:
     build:
-      context: ./backend
+      context: ../backend
       dockerfile: Dockerfile
       cache_from:
         - backend:latest
@@ -104,9 +104,9 @@ services:
     container_name: eventos_backend
     restart: unless-stopped
     env_file:
-      - ./backend/.env
+      - ../backend/env/.env.example  # Load default env vars; override with .env in production
     environment:
-      DATABASE_URL: >
+      DATABASE_URL: 
         host=postgres 
         user=${POSTGRES_USER:-eventos_user} 
         password=${POSTGRES_PASSWORD:-change_me} 
@@ -118,14 +118,14 @@ services:
       ENV: ${ENV:-production}
       LOG_LEVEL: ${LOG_LEVEL:-info}
     ports:
-      - "127.0.0.1:8080:8080"  # Bind to localhost; expose via Nginx in production
+      - "127.0.0.1:8081:8080"  # Bind to localhost; expose via Nginx in production
     depends_on:
       postgres:
         condition: service_healthy
     networks:
       - eventos_net
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8081/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -156,7 +156,7 @@ services:
   # ── Frontend React (with Nginx) ────────────────────────────────────────────
   frontend:
     build:
-      context: ./frontend
+      context: ../frontend
       dockerfile: Dockerfile
       cache_from:
         - frontend:latest
@@ -166,13 +166,13 @@ services:
     container_name: eventos_frontend
     restart: unless-stopped
     ports:
-      - "127.0.0.1:5173:80"  # Bind to localhost; expose via Nginx in production
+      - "127.0.0.1:5174:80"  # Bind to localhost; expose via Nginx in production
     depends_on:
       - backend
     networks:
       - eventos_net
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:5174/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -185,7 +185,7 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256M
-    read_only: true
+    read_only: false  # Nginx needs write access for logs and temp files
     tmpfs:
       - /var/run/nginx
       - /var/cache/nginx

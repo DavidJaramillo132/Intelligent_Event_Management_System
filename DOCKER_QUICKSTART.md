@@ -101,43 +101,6 @@ make help           # Show all commands
 
 ---
 
-## 🔒 Security Checklist
-
-### ✅ Implemented
-- [x] Non-root users (uid:1000)
-- [x] Read-only root filesystems
-- [x] no-new-privileges on all services
-- [x] Health checks on all services
-- [x] Resource limits (CPU, Memory)
-- [x] Localhost binding (127.0.0.1) for ports
-- [x] Security headers in Nginx
-- [x] Log rotation (10MB max, 3 files)
-- [x] Environment variable protection (.env excluded)
-- [x] Network isolation
-
-### ⚠️ Missing (Add Later)
-- [ ] SSL/TLS (add reverse proxy)
-- [ ] Monitoring (Prometheus/Grafana)
-- [ ] Centralized logging (ELK/Loki)
-- [ ] Backend input validation
-- [ ] CORS hardening
-- [ ] Automated backups
-
----
-
-## 📊 Service Overview
-
-| Service | Image | Port | Health | Memory Limit |
-|---------|-------|------|--------|--------------|
-| PostgreSQL | postgres:16-alpine | 5432 | ✅ | 512MB (dev) / 1GB (prod) |
-| pgAdmin | pgadmin4:latest | 5050 | ✅ | 256MB (dev) / 512MB (prod) |
-| Backend | golang:1.25.4 | 8080 | ✅ | 1GB (dev) / 2GB (prod) |
-| Frontend | nginx:alpine | 5173 | ✅ | 512MB (dev) / 1GB (prod) |
-
----
-
-## 🔄 Deployment Workflows
-
 ### First Time Setup
 ```bash
 # Clone repo
@@ -334,33 +297,3 @@ make db-restore BACKUP_FILE=backup_20240428_120000.sql
 ```
 
 ---
-
-## ✅ Pre-Production Checklist
-
-- [ ] SSL/TLS certificates obtained
-- [ ] Reverse proxy (nginx/Traefik) configured
-- [ ] Production .env file created with strong passwords
-- [ ] Database backup procedure tested
-- [ ] Monitoring/alerting configured
-- [ ] Logging aggregation setup
-- [ ] Resource limits reviewed for production scale
-- [ ] Security headers verified in nginx.conf
-- [ ] Rate limiting configured properly
-- [ ] Health checks verified working
-- [ ] Load testing completed
-- [ ] Disaster recovery plan documented
-
----
-
-## 📞 Need Help?
-
-1. **Full Documentation**: Read [docker/README.md](docker/README.md)
-2. **Audit Report**: See [DOCKER_AUDIT.md](DOCKER_AUDIT.md)
-3. **Troubleshooting**: Check docker/README.md troubleshooting section
-4. **Command Help**: Run `make help`
-5. **Service Logs**: Run `make logs`
-
----
-
-**Last Updated**: April 28, 2026  
-**Status**: ✅ Production Ready (8.5/10)
