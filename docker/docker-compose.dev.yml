@@ -15,16 +15,6 @@ services:
           cpus: '1'
           memory: 512M
 
-  pgadmin:
-    restart: unless-stopped
-    ports:
-      - "5050:80"  # Expose for local development
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-
   backend:
     restart: unless-stopped
     environment:

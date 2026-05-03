@@ -101,7 +101,6 @@ restart: ## Restart all services
 
 pull: ## Pull latest base images
 	docker pull postgres:16-alpine
-	docker pull dpage/pgadmin4:latest
 	docker pull nginx:alpine
 	docker pull golang:1.25.4-alpine
 	docker pull node:20-alpine
@@ -158,7 +157,6 @@ init: env-setup dev-build dev-up health ## Initialize and start development envi
 	@echo "Access services at:"
 	@echo "  - Frontend: http://localhost:5173"
 	@echo "  - Backend API: http://localhost:8080/health"
-	@echo "  - pgAdmin: http://localhost:5050"
 	@echo ""
 	@echo "View logs with: make logs"
 	@echo "Stop services with: make down"

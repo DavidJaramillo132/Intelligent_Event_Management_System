@@ -1,31 +1,6 @@
 # 🚀 Docker Setup Quick Reference
 
 ## Status: ✅ PRODUCTION READY (8.5/10)
-
----
-
-## 📦 What Was Created/Fixed
-
-### 18 Files Created or Modified
-```
-✅ backend/Dockerfile                 (Multi-stage Go build)
-✅ backend/.dockerignore              (Build optimization)
-✅ backend/.env.example               (Environment template)
-✅ frontend/Dockerfile                (Multi-stage Node+Nginx)
-✅ frontend/.dockerignore             (Build optimization)
-✅ frontend/nginx.conf                (Production-grade Nginx)
-✅ docker/docker-compose.yml          (Main orchestration)
-✅ docker/docker-compose.dev.yml      (Development overrides)
-✅ docker/docker-compose.prod.yml     (Production overrides)
-✅ docker/.env.example                (Docker environment template)
-✅ docker/.gitignore                  (Prevent credential leaks)
-✅ docker/deploy.sh                   (Deployment automation)
-✅ docker/README.md                   (Complete guide)
-✅ Makefile                           (30+ operational commands)
-✅ .gitignore                         (Root project gitignore)
-✅ DOCKER_AUDIT.md                    (Full audit report)
-```
-
 ---
 
 ## 🎯 Quick Start
@@ -63,6 +38,9 @@ make prod-up
 ## 📋 Essential Commands
 
 ```bash
+#Enter to WSL in the terminal
+wsl
+
 # Lifecycle
 make init           # Full setup (env, build, start, health check)
 make up             # Start dev environment
