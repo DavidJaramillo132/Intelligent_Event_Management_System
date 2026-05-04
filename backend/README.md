@@ -502,7 +502,7 @@ Todas las respuestas siguen el formato estándar:
 ### Registro
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/auth/register \
+curl -X POST ttp://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "nombre": "David",

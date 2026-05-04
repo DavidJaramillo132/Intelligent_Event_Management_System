@@ -1,0 +1,443 @@
+{
+	"info": {
+		"name": "Eventos API v1",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"description": "Colección completa para el Sistema de Gestión de Eventos"
+	},
+	"variable": [
+		{ "key": "base_url", "value": "http://localhost:3000/api/v1" },
+		{ "key": "token", "value": "" },
+		{ "key": "refresh_token", "value": "" },
+		{ "key": "usuario_id", "value": "" },
+		{ "key": "evento_id", "value": "" },
+		{ "key": "lugar_id", "value": "" },
+		{ "key": "tipo_evento_id", "value": "" },
+		{ "key": "inscripcion_id", "value": "" },
+		{ "key": "boleto_id", "value": "" },
+		{ "key": "encuesta_id", "value": "" }
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+	},
+	"item": [
+		{
+			"name": "🔓 Auth",
+			"item": [
+				{
+					"name": "Register",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/auth/register",
+						"auth": { "type": "noauth" },
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"David\",\n  \"apellido\": \"Jaramillo\",\n  \"correo_electronico\": \"david@test.com\",\n  \"contrasena\": \"123456\",\n  \"ciudad\": \"Quito\",\n  \"pais\": \"Ecuador\"\n}"
+						}
+					},
+					"event": [{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"var json = pm.response.json();",
+								"if (json.ok) {",
+								"  pm.collectionVariables.set('token', json.data.token);",
+								"  pm.collectionVariables.set('refresh_token', json.data.refresh_token);",
+								"  pm.collectionVariables.set('usuario_id', json.data.usuario.id);",
+								"}"
+							]
+						}
+					}]
+				},
+				{
+					"name": "Login",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/auth/login",
+						"auth": { "type": "noauth" },
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"correo_electronico\": \"david@test.com\",\n  \"contrasena\": \"123456\"\n}"
+						}
+					},
+					"event": [{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"var json = pm.response.json();",
+								"if (json.ok) {",
+								"  pm.collectionVariables.set('token', json.data.token);",
+								"  pm.collectionVariables.set('refresh_token', json.data.refresh_token);",
+								"  pm.collectionVariables.set('usuario_id', json.data.usuario.id);",
+								"}"
+							]
+						}
+					}]
+				},
+				{
+					"name": "Refresh Token",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/auth/refresh",
+						"auth": { "type": "noauth" },
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"refresh_token\": \"{{refresh_token}}\"\n}"
+						}
+					},
+					"event": [{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"var json = pm.response.json();",
+								"if (json.ok) {",
+								"  pm.collectionVariables.set('token', json.data.token);",
+								"  pm.collectionVariables.set('refresh_token', json.data.refresh_token);",
+								"}"
+							]
+						}
+					}]
+				}
+			]
+		},
+		{
+			"name": "📍 Lugares",
+			"item": [
+				{
+					"name": "Crear Lugar",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/lugares",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Centro de Convenciones Quito\",\n  \"direccion\": \"Av. Amazonas N34-123\",\n  \"ciudad\": \"Quito\",\n  \"provincia\": \"Pichincha\",\n  \"pais\": \"Ecuador\",\n  \"capacidad\": 1000,\n  \"descripcion\": \"Centro de convenciones principal\"\n}"
+						}
+					},
+					"event": [{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"var json = pm.response.json();",
+								"if (json.ok) { pm.collectionVariables.set('lugar_id', json.data.id); }"
+							]
+						}
+					}]
+				},
+				{
+					"name": "Listar Lugares",
+					"request": { "method": "GET", "url": "{{base_url}}/lugares" }
+				},
+				{
+					"name": "Obtener Lugar",
+					"request": { "method": "GET", "url": "{{base_url}}/lugares/{{lugar_id}}" }
+				},
+				{
+					"name": "Actualizar Lugar",
+					"request": {
+						"method": "PUT",
+						"url": "{{base_url}}/lugares/{{lugar_id}}",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"capacidad\": 1500,\n  \"descripcion\": \"Centro renovado 2026\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Eliminar Lugar",
+					"request": { "method": "DELETE", "url": "{{base_url}}/lugares/{{lugar_id}}" }
+				}
+			]
+		},
+		{
+			"name": "🏷️ Tipos de Evento",
+			"item": [
+				{
+					"name": "Crear Tipo Evento",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/tipos-evento",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"nombre\": \"Conferencia\",\n  \"descripcion\": \"Eventos de tipo conferencia\"\n}"
+						}
+					},
+					"event": [{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"var json = pm.response.json();",
+								"if (json.ok) { pm.collectionVariables.set('tipo_evento_id', json.data.id); }"
+							]
+						}
+					}]
+				},
+				{
+					"name": "Listar Tipos Evento",
+					"request": { "method": "GET", "url": "{{base_url}}/tipos-evento" }
+				},
+				{
+					"name": "Obtener Tipo Evento",
+					"request": { "method": "GET", "url": "{{base_url}}/tipos-evento/{{tipo_evento_id}}" }
+				},
+				{
+					"name": "Actualizar Tipo Evento",
+					"request": {
+						"method": "PUT",
+						"url": "{{base_url}}/tipos-evento/{{tipo_evento_id}}",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"descripcion\": \"Conferencias y charlas magistrales\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Eliminar Tipo Evento",
+					"request": { "method": "DELETE", "url": "{{base_url}}/tipos-evento/{{tipo_evento_id}}" }
+				}
+			]
+		},
+		{
+			"name": "🎪 Eventos",
+			"item": [
+				{
+					"name": "Crear Evento",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/eventos",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"organizador_id\": \"{{usuario_id}}\",\n  \"tipo_evento_id\": {{tipo_evento_id}},\n  \"lugar_id\": \"{{lugar_id}}\",\n  \"titulo\": \"Tech Summit Ecuador 2026\",\n  \"descripcion\": \"El evento de tecnología más grande del país\",\n  \"inicio\": \"2026-07-15T09:00:00-05:00\",\n  \"fin\": \"2026-07-15T18:00:00-05:00\",\n  \"capacidad\": 500,\n  \"costo\": 25.00\n}"
+						}
+					},
+					"event": [{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"var json = pm.response.json();",
+								"if (json.ok) { pm.collectionVariables.set('evento_id', json.data.id); }"
+							]
+						}
+					}]
+				},
+				{
+					"name": "Listar Eventos",
+					"request": { "method": "GET", "url": "{{base_url}}/eventos" }
+				},
+				{
+					"name": "Obtener Evento",
+					"request": { "method": "GET", "url": "{{base_url}}/eventos/{{evento_id}}" }
+				},
+				{
+					"name": "Listar por Organizador",
+					"request": { "method": "GET", "url": "{{base_url}}/eventos/organizador/{{usuario_id}}" }
+				},
+				{
+					"name": "Actualizar Evento",
+					"request": {
+						"method": "PUT",
+						"url": "{{base_url}}/eventos/{{evento_id}}",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"estado\": \"publicado\",\n  \"capacidad\": 800\n}"
+						}
+					}
+				},
+				{
+					"name": "Eliminar Evento",
+					"request": { "method": "DELETE", "url": "{{base_url}}/eventos/{{evento_id}}" }
+				}
+			]
+		},
+		{
+			"name": "🎫 Inscripciones",
+			"item": [
+				{
+					"name": "Crear Inscripción",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/inscripciones",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"evento_id\": \"{{evento_id}}\",\n  \"asistente_id\": \"{{usuario_id}}\"\n}"
+						}
+					},
+					"event": [{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"var json = pm.response.json();",
+								"if (json.ok) {",
+								"  pm.collectionVariables.set('inscripcion_id', json.data.id);",
+								"  if (json.data.boleto) pm.collectionVariables.set('boleto_id', json.data.boleto.id);",
+								"}"
+							]
+						}
+					}]
+				},
+				{
+					"name": "Obtener Inscripción",
+					"request": { "method": "GET", "url": "{{base_url}}/inscripciones/{{inscripcion_id}}" }
+				},
+				{
+					"name": "Listar por Evento",
+					"request": { "method": "GET", "url": "{{base_url}}/inscripciones/evento/{{evento_id}}" }
+				},
+				{
+					"name": "Listar por Asistente",
+					"request": { "method": "GET", "url": "{{base_url}}/inscripciones/asistente/{{usuario_id}}" }
+				},
+				{
+					"name": "Cambiar Estado",
+					"request": {
+						"method": "PATCH",
+						"url": "{{base_url}}/inscripciones/{{inscripcion_id}}/estado",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"estado\": \"confirmado\"\n}"
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "📦 Materiales",
+			"item": [
+				{
+					"name": "Crear Material",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/materiales",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"evento_id\": \"{{evento_id}}\",\n  \"nombre\": \"Proyector\",\n  \"cantidad\": 2,\n  \"notas\": \"Proyector HD para sala principal\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Listar por Evento",
+					"request": { "method": "GET", "url": "{{base_url}}/materiales/evento/{{evento_id}}" }
+				}
+			]
+		},
+		{
+			"name": "✅ Check-ins",
+			"item": [
+				{
+					"name": "Registrar Check-in",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/checkins",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"evento_id\": \"{{evento_id}}\",\n  \"inscripcion_id\": \"{{inscripcion_id}}\",\n  \"boleto_id\": \"{{boleto_id}}\",\n  \"revisado_por\": \"{{usuario_id}}\",\n  \"notas\": \"Ingreso VIP\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Listar por Evento",
+					"request": { "method": "GET", "url": "{{base_url}}/checkins/evento/{{evento_id}}" }
+				}
+			]
+		},
+		{
+			"name": "📋 Encuestas",
+			"item": [
+				{
+					"name": "Crear Encuesta con Preguntas",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/encuestas",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"evento_id\": \"{{evento_id}}\",\n  \"titulo\": \"Encuesta de satisfacción\",\n  \"descripcion\": \"Cuéntanos tu experiencia\",\n  \"preguntas\": [\n    {\n      \"texto_pregunta\": \"¿Cómo calificarías el evento?\",\n      \"tipo_pregunta\": \"escala\",\n      \"requerido\": true,\n      \"orden\": 1\n    },\n    {\n      \"texto_pregunta\": \"¿Qué mejorarías?\",\n      \"tipo_pregunta\": \"texto\",\n      \"requerido\": false,\n      \"orden\": 2\n    }\n  ]\n}"
+						}
+					},
+					"event": [{
+						"listen": "test",
+						"script": {
+							"exec": [
+								"var json = pm.response.json();",
+								"if (json.ok) { pm.collectionVariables.set('encuesta_id', json.data.id); }"
+							]
+						}
+					}]
+				},
+				{
+					"name": "Obtener Encuesta",
+					"request": { "method": "GET", "url": "{{base_url}}/encuestas/{{encuesta_id}}" }
+				},
+				{
+					"name": "Listar por Evento",
+					"request": { "method": "GET", "url": "{{base_url}}/encuestas/evento/{{evento_id}}" }
+				},
+				{
+					"name": "Enviar Respuesta",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/encuestas/responder",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"encuesta_id\": {{encuesta_id}},\n  \"inscripcion_id\": \"{{inscripcion_id}}\",\n  \"respuestas\": [\n    { \"pregunta_id\": 1, \"respuesta\": \"Excelente\", \"puntaje_numerico\": 5.0 },\n    { \"pregunta_id\": 2, \"respuesta\": \"Más tiempo de networking\" }\n  ]\n}"
+						}
+					}
+				},
+				{
+					"name": "Listar Respuestas",
+					"request": { "method": "GET", "url": "{{base_url}}/encuestas/{{encuesta_id}}/respuestas" }
+				}
+			]
+		},
+		{
+			"name": "🤖 IA",
+			"item": [
+				{
+					"name": "Crear Predicción",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/ia/predicciones",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"evento_id\": \"{{evento_id}}\",\n  \"asistencia_predicha\": 350,\n  \"confianza\": 85.5,\n  \"version_modelo\": \"v1.0\",\n  \"notas\": \"Predicción basada en históricos\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Listar Predicciones por Evento",
+					"request": { "method": "GET", "url": "{{base_url}}/ia/predicciones/evento/{{evento_id}}" }
+				},
+				{
+					"name": "Crear Análisis",
+					"request": {
+						"method": "POST",
+						"url": "{{base_url}}/ia/analisis",
+						"header": [{ "key": "Content-Type", "value": "application/json" }],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"evento_id\": \"{{evento_id}}\",\n  \"puntaje_promedio\": 4.5,\n  \"resumen_sentimiento\": \"Muy positivo\",\n  \"puntos_positivos\": \"Organización, speakers, networking\",\n  \"puntos_mejora\": \"Más descansos, mejor señalización\"\n}"
+						}
+					}
+				},
+				{
+					"name": "Listar Análisis por Evento",
+					"request": { "method": "GET", "url": "{{base_url}}/ia/analisis/evento/{{evento_id}}" }
+				}
+			]
+		}
+	]
+}

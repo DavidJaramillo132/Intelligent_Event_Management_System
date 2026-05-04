@@ -35,7 +35,7 @@ main() {
     
     # Validate environment
     if [[ ! -f .env ]]; then
-        log_error ".env file not found. Run: cp .env.example .env"
+        log_error ".env file not found. Run: cp .env .env"
         exit 1
     fi
     

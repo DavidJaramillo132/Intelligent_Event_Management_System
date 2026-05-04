@@ -24,7 +24,7 @@ RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build \
     -ldflags="-w -s" \
     -a \
     -installsuffix cgo \
-    -o main .
+    -o main ./cmd/server
 
 # Stage 2: Runtime - Alpine slim image
 FROM alpine:3.20

@@ -2,11 +2,11 @@ package main
 
 import (
 	"log"
-	"os"
 	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/joho/godotenv"
+	"main.go/config"
 	"main.go/db"
 	"main.go/router"
 )
@@ -26,6 +26,10 @@ func main() {
 		log.Printf("⚠️ No se pudo cargar .env, usando variables de entorno del sistema")
 	}
 
+	// ── CARGAR CONFIGURACIÓN ────────────────────────────────────────────────
+	cfg := config.Load()
+	log.Printf("🔧 Configuración cargada: Env=%s, Debug=%v", cfg.App.Env, cfg.App.Debug)
+
 	// ── CONECTAR A LA BASE DE DATOS ─────────────────────────────────────────
 	conn := db.Connect()
 	db.Migrate(conn)
@@ -38,8 +42,9 @@ func main() {
 
 	app := fiber.New(fiber.Config{
 		AppName:      "Eventos API v1.0",
-		ReadTimeout:  10 * time.Second,
-		WriteTimeout: 10 * time.Second,
+		ReadTimeout:  cfg.Server.ReadTimeout,
+		WriteTimeout: cfg.Server.WriteTimeout,
+		IdleTimeout:  cfg.Server.IdleTimeout,
 		// Manejo global de errores
 		ErrorHandler: func(c *fiber.Ctx, err error) error {
 			code := fiber.StatusInternalServerError
@@ -65,13 +70,8 @@ func main() {
 	// ── REGISTRAR RUTAS ────────────────────────────────────────────────────
 	router.Setup(app)
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	log.Printf("🚀 Servidor corriendo en http://localhost:%s", port)
-	if err := app.Listen(":" + port); err != nil {
+	log.Printf("🚀 Servidor corriendo en http://localhost:%s", cfg.Server.Port)
+	if err := app.Listen(":" + cfg.Server.Port); err != nil {
 		log.Fatalf("❌ Error al iniciar el servidor: %v", err)
 	}
 

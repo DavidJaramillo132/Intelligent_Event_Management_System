@@ -15,7 +15,7 @@
 cd docker
 
 # Create .env from example
-cp .env.example .env
+cp .env .env
 
 # Start services (development)
 docker-compose -f docker-compose.yml -f docker-compose.dev.yml up -d
@@ -34,7 +34,7 @@ docker-compose logs -f
 cd docker
 
 # Create .env from example and customize
-cp .env.example .env
+cp .env .env
 # Edit .env with production values:
 # - Strong passwords
 # - Proper database credentials

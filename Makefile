@@ -116,8 +116,8 @@ clean: ## Remove all containers and volumes (⚠️ deletes data)
 
 env-setup: ## Setup .env files from examples
 	@echo "Setting up environment files..."
-	@test -f docker/.env || cp docker/.env.example docker/.env && echo "✓ Created docker/.env"
-	@test -f backend/.env || cp backend/env/.env.example backend/.env && echo "✓ Created backend/.env"
+	@test -f docker/.env || cp docker/.env docker/.env && echo "✓ Created docker/.env"
+	@test -f backend/.env || cp backend/env/.env backend/.env && echo "✓ Created backend/.env"
 	@echo ""
 	@echo "⚠️  IMPORTANT: Edit these files with production values:"
 	@echo "   - docker/.env"

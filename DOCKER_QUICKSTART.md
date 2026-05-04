@@ -25,7 +25,7 @@ make logs
 ### Production Setup
 ```bash
 cd docker
-cp .env.example .env
+cp .env.env
 # Edit .env with production values
 
 cd ..
@@ -116,7 +116,7 @@ git commit -m "Your changes"
 ```bash
 # Prepare production environment
 cd docker
-cp .env.example .env
+cp .env .env
 # Edit .env with production passwords/URLs
 
 # Deploy
@@ -201,8 +201,6 @@ docker port eventos_frontend
 | `backend/Dockerfile` | Go multi-stage build |
 | `frontend/Dockerfile` | Node+Nginx build |
 | `frontend/nginx.conf` | Nginx configuration |
-| `docker/.env.example` | Environment template |
-| `backend/.env.example` | Backend config template |
 | `Makefile` | Operational commands |
 | `DOCKER_AUDIT.md` | Full audit report |
 
