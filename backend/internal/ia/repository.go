@@ -52,3 +52,25 @@ func (r *Repository) ListarAnalisisPorEvento(eventoID string) ([]models.Analisis
 	}
 	return analisis, nil
 }
+
+// ── Análisis de público ─────────────────────────────────────────────────────
+
+func (r *Repository) CrearPublico(a *models.AnalisisPublico) error {
+	return db.GetDB().Create(a).Error
+}
+
+func (r *Repository) BuscarPublicoPorID(id int64) (*models.AnalisisPublico, error) {
+	var a models.AnalisisPublico
+	if err := db.GetDB().First(&a, "id = ?", id).Error; err != nil {
+		return nil, err
+	}
+	return &a, nil
+}
+
+func (r *Repository) ListarPublicoPorEvento(eventoID string) ([]models.AnalisisPublico, error) {
+	var analisis []models.AnalisisPublico
+	if err := db.GetDB().Where("evento_id = ?", eventoID).Order("generado_en DESC").Find(&analisis).Error; err != nil {
+		return nil, err
+	}
+	return analisis, nil
+}

@@ -10,7 +10,7 @@ type Handler struct {
 }
 
 func NewHandler() *Handler {
-	return &Handler{service: NewService(NewRepository())}
+	return &Handler{service: NewService(NewRepository(), NewIAClient())}
 }
 
 // POST /api/v1/ia/predicciones
@@ -63,6 +63,33 @@ func (h *Handler) ObtenerAnalisis(c *fiber.Ctx) error {
 // GET /api/v1/ia/analisis/evento/:eventoId
 func (h *Handler) ListarAnalisisPorEvento(c *fiber.Ctx) error {
 	resp, err := h.service.ListarAnalisisPorEvento(c.Params("eventoId"))
+	if err != nil { return err }
+	return c.JSON(fiber.Map{"ok": true, "data": resp})
+}
+
+// POST /api/v1/ia/publico
+func (h *Handler) CrearPublico(c *fiber.Ctx) error {
+	var input CrearPublicoInput
+	if err := c.BodyParser(&input); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "JSON inválido")
+	}
+	resp, err := h.service.CrearPublico(input)
+	if err != nil { return err }
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{"ok": true, "data": resp})
+}
+
+// GET /api/v1/ia/publico/:id
+func (h *Handler) ObtenerPublico(c *fiber.Ctx) error {
+	id, err := strconv.ParseInt(c.Params("id"), 10, 64)
+	if err != nil { return fiber.NewError(fiber.StatusBadRequest, "ID inválido") }
+	resp, err := h.service.ObtenerPublicoPorID(id)
+	if err != nil { return err }
+	return c.JSON(fiber.Map{"ok": true, "data": resp})
+}
+
+// GET /api/v1/ia/publico/evento/:eventoId
+func (h *Handler) ListarPublicoPorEvento(c *fiber.Ctx) error {
+	resp, err := h.service.ListarPublicoPorEvento(c.Params("eventoId"))
 	if err != nil { return err }
 	return c.JSON(fiber.Map{"ok": true, "data": resp})
 }

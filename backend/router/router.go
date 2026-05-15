@@ -129,4 +129,8 @@ func Setup(app *fiber.App) {
 	iaGroup.Post("/analisis", middleware.RolRequerido("organizador", "admin"), iaH.CrearAnalisis)
 	iaGroup.Get("/analisis/:id", iaH.ObtenerAnalisis)
 	iaGroup.Get("/analisis/evento/:eventoId", iaH.ListarAnalisisPorEvento)
+	// Análisis de público
+	iaGroup.Post("/publico", middleware.RolRequerido("organizador", "admin"), iaH.CrearPublico)
+	iaGroup.Get("/publico/:id", iaH.ObtenerPublico)
+	iaGroup.Get("/publico/evento/:eventoId", iaH.ListarPublicoPorEvento)
 }
