@@ -22,7 +22,6 @@ func NewService(repo *Repository) *Service {
 // DTOs moved to dto.go
 
 // ── MÉTODOS ──────────────────────────────────────────────────────────────────
-
 func (s *Service) Registrar(input RegisterInput) (*AuthResponse, error) {
 	// Validaciones
 	if input.Nombre == "" || input.Apellido == "" || input.CorreoElectronico == "" || input.Contrasena == "" {

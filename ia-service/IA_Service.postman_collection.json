@@ -1,0 +1,67 @@
+{
+  "info": {
+    "name": "IA Service - Eventos",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "description": "Colección Postman para el microservicio ia-service. Endpoints: /ia/prediccion, /ia/satisfaccion, /ia/publico y /health. Ajusta {{base_url}} si corres en otro puerto."
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000" },
+    { "key": "evento_id", "value": "evt-123" }
+  ],
+  "item": [
+    {
+      "name": "🔁 Health",
+      "request": {
+        "method": "GET",
+        "url": "{{base_url}}/health",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "🤖 Predicción de asistencia",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/ia/prediccion/",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"evento_id\": \"{{evento_id}}\",\n  \"titulo\": \"Tech Summit 2026\",\n  \"tipo_evento\": \"conferencia\",\n  \"capacidad\": 500,\n  \"costo\": 25.0,\n  \"fecha_inicio\": \"2026-07-15T09:00:00-05:00\",\n  \"lugar\": \"Centro Convenciones Quito\",\n  \"ciudad\": \"Quito\",\n  \"eventos_previos\": [\n    { \"titulo\": \"Tech Summit 2025\", \"asistentes\": 420, \"capacidad\": 500 }\n  ]\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "📊 Análisis de satisfacción",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/ia/satisfaccion/",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"evento_id\": \"{{evento_id}}\",\n  \"titulo\": \"Tech Summit 2026\",\n  \"tipo_evento\": \"conferencia\",\n  \"total_asistentes\": 500,\n  \"total_respuestas\": 120,\n  \"respuestas\": [\n    { \"pregunta\": \"¿Cómo calificarías el evento?\", \"respuesta\": \"Excelente\", \"puntaje\": 5 },\n    { \"pregunta\": \"¿Qué mejorarías?\", \"respuesta\": \"Más tiempo de networking\" }\n  ]\n}"
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "👥 Análisis de público",
+      "request": {
+        "method": "POST",
+        "url": "{{base_url}}/ia/publico/",
+        "header": [
+          { "key": "Content-Type", "value": "application/json" }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"evento_id\": \"{{evento_id}}\",\n  \"titulo\": \"Tech Summit 2026\",\n  \"tipo_evento\": \"conferencia\",\n  \"asistentes\": [\n    { \"nombre\": \"Ana\", \"ciudad\": \"Quito\", \"provincia\": \"Pichincha\", \"pais\": \"Ecuador\" },\n    { \"nombre\": \"Luis\", \"ciudad\": \"Guayaquil\", \"provincia\": \"Guayas\", \"pais\": \"Ecuador\" },\n    { \"nombre\": \"María\", \"ciudad\": \"Quito\", \"provincia\": \"Pichincha\", \"pais\": \"Ecuador\" }\n  ]\n}"
+        }
+      },
+      "response": []
+    }
+  ]
+}

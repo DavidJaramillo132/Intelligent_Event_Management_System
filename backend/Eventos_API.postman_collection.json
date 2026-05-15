@@ -2,10 +2,10 @@
 	"info": {
 		"name": "Eventos API v1",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"description": "Colección completa para el Sistema de Gestión de Eventos"
+		"description": "Colección actualizada: endpoints v1 del backend (base_url por defecto: http://localhost:8080). Incluye requests para auth, lugares, tipos-evento, eventos, inscripciones, materiales, checkins, encuestas e IA. Cambia {{base_url}} si corres en otro puerto."
 	},
 	"variable": [
-		{ "key": "base_url", "value": "http://localhost:3000/api/v1" },
+		{ "key": "base_url", "value": "http://localhost:8080/api/v1" },
 		{ "key": "token", "value": "" },
 		{ "key": "refresh_token", "value": "" },
 		{ "key": "usuario_id", "value": "" },

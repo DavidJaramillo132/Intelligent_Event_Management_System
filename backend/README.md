@@ -406,143 +406,148 @@ Almacena resultados de **modelos de inteligencia artificial**:
 
 ---
 
-## 🗄 Modelos de Datos
-
-### Diagrama ER (simplificado)
-
-```mermaid
-erDiagram
-    USUARIOS ||--o{ EVENTOS : organiza
-    USUARIOS ||--o{ INSCRIPCIONES : se_inscribe
-    EVENTOS ||--o{ INSCRIPCIONES : tiene
-    EVENTOS }o--|| TIPOS_EVENTO : pertenece
-    EVENTOS }o--o| LUGARES : se_realiza_en
-    INSCRIPCIONES ||--o| BOLETOS : genera
-    EVENTOS ||--o{ MATERIALES_EVENTO : requiere
-    EVENTOS ||--o{ REGISTROS_CHECKIN : registra
-    INSCRIPCIONES ||--o{ REGISTROS_CHECKIN : valida
-    BOLETOS ||--o{ REGISTROS_CHECKIN : verifica
-    EVENTOS ||--o{ ENCUESTAS : tiene
-    ENCUESTAS ||--o{ PREGUNTAS_ENCUESTA : contiene
-    ENCUESTAS ||--o{ RESPUESTAS_ENCUESTA : recibe
-    RESPUESTAS_ENCUESTA ||--o{ RESPUESTAS_PREGUNTA : detalla
-    EVENTOS ||--o{ PREDICCIONES_ASISTENCIA : predice
-    EVENTOS ||--o{ ANALISIS_SATISFACCION : analiza
-```
 
 ### Tablas principales
 
-| Tabla                          | PK      | Descripción                                    |
-| ------------------------------ | ------- | ---------------------------------------------- |
-| `usuarios`                     | UUID    | Usuarios del sistema (asistentes, organizadores, admin) |
-| `lugares`                      | UUID    | Sedes donde se realizan eventos                |
-| `tipos_evento`                 | BIGSERIAL | Categorías de eventos                        |
-| `eventos`                      | UUID    | Eventos con fechas, capacidad, costo           |
-| `inscripciones`                | UUID    | Registro de asistentes a eventos               |
-| `boletos`                      | UUID    | Boletos generados por inscripción              |
-| `materiales_evento`            | UUID    | Recursos/materiales de un evento               |
-| `registros_checkin`            | UUID    | Registro de ingreso al evento                  |
-| `encuestas`                    | BIGSERIAL | Encuestas por evento                         |
-| `preguntas_encuesta`           | BIGSERIAL | Preguntas de una encuesta                    |
-| `respuestas_encuesta`          | BIGSERIAL | Cabecera de respuestas enviadas              |
-| `respuestas_pregunta_encuesta` | BIGSERIAL | Respuesta individual por pregunta            |
-| `predicciones_asistencia`      | BIGSERIAL | Predicciones de IA                           |
-| `analisis_satisfaccion`        | BIGSERIAL | Análisis de satisfacción por IA              |
+# 🎪 Eventos API — Backend
+
+API REST para el **Sistema Inteligente de Gestión de Eventos**. Este README se actualizó para reflejar la estructura y la forma de arranque actuales del backend.
 
 ---
 
-## 📤 Formato de Respuesta
+**Resumen de cambios relevantes**
 
-Todas las respuestas siguen el formato estándar:
-
-### Éxito
-
-```json
-{
-  "ok": true,
-  "data": { ... }
-}
-```
-
-### Éxito con mensaje
-
-```json
-{
-  "ok": true,
-  "message": "Recurso eliminado correctamente"
-}
-```
-
-### Error
-
-```json
-{
-  "ok": false,
-  "error": "Descripción del error"
-}
-```
-
-### Códigos HTTP utilizados
-
-| Código | Significado                                |
-| ------ | ------------------------------------------ |
-| 200    | OK — operación exitosa                     |
-| 201    | Created — recurso creado                   |
-| 400    | Bad Request — datos inválidos              |
-| 401    | Unauthorized — token inválido/ausente      |
-| 403    | Forbidden — rol insuficiente               |
-| 404    | Not Found — recurso no encontrado          |
-| 409    | Conflict — duplicado (correo, nombre, etc) |
-| 500    | Internal Server Error                      |
+- Punto de entrada: `cmd/server/main.go` (usar `go run ./cmd/server`)
+- Las migraciones no se ejecutan con `AutoMigrate`: el esquema SQL está en `docker/db/init/001_create_tables.sql`.
+- La configuración admite `DATABASE_URL` (tiene prioridad) o variables individuales de conexión.
 
 ---
 
-## 📝 Ejemplos de Uso
+## 📦 Tecnologías principales
 
-### Registro
+- Go 1.25.x
+- Fiber v2
+- GORM (Postgres driver)
+- PostgreSQL
+- JWT (golang-jwt)
+- godotenv
 
-```bash
-curl -X POST ttp://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{
-    "nombre": "David",
-    "apellido": "Jaramillo",
-    "correo_electronico": "david@example.com",
-    "contrasena": "mi_password_segura",
-    "ciudad": "Quito",
-    "pais": "Ecuador"
-  }'
-```
+---
 
-### Login
+## 🔑 Variables de entorno (relevantes)
 
-```bash
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{
-    "correo_electronico": "david@example.com",
-    "contrasena": "mi_password_segura"
-  }'
-```
+Crear un archivo `.env` en la raíz de `backend/` o exportar las variables en el entorno.
 
-### Crear un evento (requiere token)
+Opciones de conexión a la DB (se usa `DATABASE_URL` si está definida):
 
-```bash
-curl -X POST http://localhost:8080/api/v1/eventos \
-  -H "Content-Type: application/json" \
-  -H "Authorization: Bearer <tu_token>" \
-  -d '{
-    "organizador_id": "uuid-del-organizador",
-    "tipo_evento_id": 1,
-    "titulo": "Tech Summit 2026",
-    "descripcion": "Evento de tecnología",
-    "inicio": "2026-06-15T09:00:00-05:00",
-    "fin": "2026-06-15T18:00:00-05:00",
-    "capacidad": 500,
-    "costo": 25.00
-  }'
+```env
+# Opción 1 (URL completa, PRIORIDAD):
+# DATABASE_URL=postgres://user:pass@host:5432/dbname?sslmode=disable
+
+# Opción 2 (componentes individuales):
+DB_HOST=localhost
+DB_PORT=5432
+DB_USER=eventos_user
+DB_PASSWORD=eventos_pass
+DB_NAME=eventos_db
+DB_SSLMODE=disable
+DB_TIMEZONE=America/Guayaquil
+
+# Pool / timeouts (opcionales)
+DB_MAX_OPEN_CONNS=25
+DB_MAX_IDLE_CONNS=10
+DB_CONN_MAX_LIFETIME=5m
+
+# JWT
+JWT_SECRET=tu-super-secreto-cambiar-en-prod
+JWT_ACCESS_DURATION=24h
+JWT_REFRESH_DURATION=168h
+
+# Server
+PORT=8080
+APP_ENV=dev      # o 'production'
+DEBUG=false
 ```
 
 ---
 
-> Desarrollado con ❤️ usando Go + Fiber + GORM
+## 🚀 Inicio rápido (desarrollo)
+
+1. Instalar dependencias y tidy:
+
+```bash
+cd backend
+go mod tidy
+```
+
+2. Levantar PostgreSQL (ejemplo con Docker Compose desde la raíz del repo):
+
+```bash
+docker compose -f docker/docker-compose.dev.yml up -d postgres
+```
+
+3. Configurar `backend/.env` (ver sección anterior).
+
+4. Ejecutar la API localmente:
+
+```bash
+# desde la carpeta backend
+go run ./cmd/server
+```
+
+---
+
+## 🐳 Usar Docker
+
+Construir la imagen del backend:
+
+```bash
+docker build -t eventos-api ./backend
+```
+
+Ejecutar (ejemplo, usando `.env`):
+
+```bash
+docker run -p 8080:8080 --env-file backend/.env eventos-api
+```
+
+---
+
+## 🗄 Migraciones
+
+Las migraciones no se realizan mediante `AutoMigrate`. El esquema SQL inicial se encuentra en `docker/db/init/001_create_tables.sql` y se aplica automáticamente cuando se levanta la base de datos con la configuración Docker del repo.
+
+Si necesita aplicar cambios manuales, ejecute los scripts SQL contra la DB abierta.
+
+---
+
+## 🧭 Rutas principales (resumen)
+
+Base URL: `http://localhost:8080/api/v1`
+
+- Auth (públicas):
+  - `POST /api/v1/auth/register`
+  - `POST /api/v1/auth/login`
+  - `POST /api/v1/auth/refresh`
+
+- Endpoints protegidos (usar `Authorization: Bearer <token>`):
+  - Lugares: `/api/v1/lugares` (CRUD)
+  - Tipos de evento: `/api/v1/tipos-evento` (CRUD)
+  - Eventos: `/api/v1/eventos` (CRUD, listar por organizador)
+  - Inscripciones: `/api/v1/inscripciones` (crear, listar)
+  - Materiales: `/api/v1/materiales` (CRUD)
+  - Check-ins: `/api/v1/checkins` (registrar, listar)
+  - Encuestas: `/api/v1/encuestas` (crear, responder, listar)
+  - IA: `/api/v1/ia` (predicciones y análisis)
+
+Consulte `router/router.go` para el listado completo y las reglas de roles.
+
+---
+
+## Recursos y archivos importantes
+
+- Punto de entrada: [cmd/server/main.go](cmd/server/main.go#L1)
+- Rutas: [router/router.go](router/router.go#L1)
+- Configuración: [config/config.go](config/config.go#L1)
+- Conexión DB: [db/database.go](db/database.go#L1)
+- Scripts SQL iniciales: `docker/db/init/001_create_tables.sql`
