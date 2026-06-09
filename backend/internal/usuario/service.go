@@ -45,6 +45,12 @@ func (s *Service) Registrar(input RegisterInput) (*AuthResponse, error) {
 		pais = "Ecuador"
 	}
 
+	// Rol: whitelist, nunca admin por auto-registro
+	rol := "asistente"
+	if input.Rol == "organizador" {
+		rol = "organizador"
+	}
+
 	u := &models.Usuario{
 		Nombre:            input.Nombre,
 		Apellido:          input.Apellido,
@@ -54,7 +60,7 @@ func (s *Service) Registrar(input RegisterInput) (*AuthResponse, error) {
 		Ciudad:            input.Ciudad,
 		Provincia:         input.Provincia,
 		Pais:              pais,
-		Rol:               "asistente", // siempre asistente al registrarse
+		Rol:               rol,
 	}
 
 	if err := s.repo.CrearUsuario(u); err != nil {

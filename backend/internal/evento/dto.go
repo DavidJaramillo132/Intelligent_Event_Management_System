@@ -16,6 +16,7 @@ type CrearEventoInput struct {
 	InicioRegistro *time.Time `json:"inicio_registro,omitempty"`
 	FinRegistro    *time.Time `json:"fin_registro,omitempty"`
 	Costo          float64    `json:"costo"`
+	ImagenPortada  string     `json:"imagen_portada,omitempty"`
 }
 
 type ActualizarEventoInput struct {
@@ -30,6 +31,7 @@ type ActualizarEventoInput struct {
 	FinRegistro    *time.Time `json:"fin_registro,omitempty"`
 	Costo          *float64   `json:"costo,omitempty"`
 	Estado         *string    `json:"estado,omitempty"`
+	ImagenPortada  *string    `json:"imagen_portada,omitempty"`
 }
 
 type EventoResponse struct {
@@ -46,6 +48,7 @@ type EventoResponse struct {
 	FinRegistro     *string `json:"fin_registro,omitempty"`
 	Costo           float64 `json:"costo"`
 	Estado          string  `json:"estado"`
+	ImagenPortada   string  `json:"imagen_portada,omitempty"`
 	CreadoEn        string  `json:"creado_en"`
 	ActualizadoEn   string  `json:"actualizado_en"`
 }

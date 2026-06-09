@@ -10,6 +10,7 @@ type Inscripcion struct {
 	ID            uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"        json:"id"`
 	EventoID      uuid.UUID  `gorm:"type:uuid;not null;uniqueIndex:idx_evento_asistente"    json:"evento_id"`
 	AsistenteID   uuid.UUID  `gorm:"type:uuid;not null;uniqueIndex:idx_evento_asistente"    json:"asistente_id"`
+	TipoEntradaID *uuid.UUID `gorm:"type:uuid"                                             json:"tipo_entrada_id,omitempty"`
 	Estado        string     `gorm:"type:varchar(40);not null;default:'inscrito'"           json:"estado"`
 	RegistradoEn  time.Time  `gorm:"autoCreateTime"                                         json:"registrado_en"`
 	ConfirmadoEn  *time.Time `gorm:"default:null"                                           json:"confirmado_en,omitempty"`

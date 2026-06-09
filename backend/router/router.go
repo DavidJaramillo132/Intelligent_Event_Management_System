@@ -10,7 +10,10 @@ import (
 	"main.go/internal/inscripcion"
 	"main.go/internal/ia"
 	"main.go/internal/lugar"
+	"main.go/internal/sesion_evento"
+	"main.go/internal/tipo_entrada"
 	"main.go/internal/tipo_evento"
+	"main.go/internal/upload"
 	"main.go/internal/usuario"
 	"main.go/middleware"
 )
@@ -25,15 +28,21 @@ func Setup(app *fiber.App) {
 		AllowHeaders: "Origin,Content-Type,Accept,Authorization",
 	}))
 
+	// ── Servir archivos estáticos de uploads ─────────────────────────────────
+	app.Static("/uploads", "./uploads")
+
 	// ── Handlers ────────────────────────────────────────────────────────────
-	usuarioH     := usuario.NewHandler()
-	lugarH       := lugar.NewHandler()
-	tipoEventoH  := tipo_evento.NewHandler()
-	eventoH      := evento.NewHandler()
-	inscripcionH := inscripcion.NewHandler()
-	checkinH     := checkin.NewHandler()
-	encuestaH    := encuesta.NewHandler()
-	iaH          := ia.NewHandler()
+	usuarioH      := usuario.NewHandler()
+	lugarH        := lugar.NewHandler()
+	tipoEventoH   := tipo_evento.NewHandler()
+	eventoH       := evento.NewHandler()
+	inscripcionH  := inscripcion.NewHandler()
+	checkinH      := checkin.NewHandler()
+	encuestaH     := encuesta.NewHandler()
+	iaH           := ia.NewHandler()
+	uploadH       := upload.NewHandler()
+	tipoEntradaH  := tipo_entrada.NewHandler()
+	sesionEventoH := sesion_evento.NewHandler()
 
 	// ── Prefijo base ────────────────────────────────────────────────────────
 	api := app.Group("/api/v1")
@@ -79,6 +88,19 @@ func Setup(app *fiber.App) {
 	eventos.Put("/:id", middleware.RolRequerido("organizador", "admin"), eventoH.Actualizar)
 	eventos.Delete("/:id", middleware.RolRequerido("organizador", "admin"), eventoH.Eliminar)
 
+	// ── Tipos de Entrada (sub-recurso de evento) ────────────────────────────
+	eventos.Get("/:eventoId/tipos-entrada", tipoEntradaH.ListarPorEvento)
+	eventos.Post("/:eventoId/tipos-entrada", middleware.RolRequerido("organizador", "admin"), tipoEntradaH.Crear)
+	eventos.Get("/:eventoId/disponibilidad", tipoEntradaH.Disponibilidad)
+
+	// ── Sesiones de Evento (sub-recurso de evento) ──────────────────────────
+	eventos.Get("/:eventoId/sesiones", sesionEventoH.ListarPorEvento)
+	eventos.Post("/:eventoId/sesiones", middleware.RolRequerido("organizador", "admin"), sesionEventoH.Crear)
+
+	// ── Sesiones (edición/eliminación directa) ──────────────────────────────
+	sesiones := protected.Group("/sesiones")
+	sesiones.Delete("/:id", middleware.RolRequerido("organizador", "admin"), sesionEventoH.Eliminar)
+
 	// ── Inscripciones ───────────────────────────────────────────────────────
 	inscripciones := protected.Group("/inscripciones")
 	inscripciones.Post("/", inscripcionH.Crear)
@@ -86,6 +108,10 @@ func Setup(app *fiber.App) {
 	inscripciones.Get("/evento/:eventoId", inscripcionH.ListarPorEvento)
 	inscripciones.Get("/asistente/:asistenteId", inscripcionH.ListarPorAsistente)
 	inscripciones.Patch("/:id/estado", middleware.RolRequerido("organizador", "admin"), inscripcionH.ActualizarEstado)
+
+	// ── Uploads ─────────────────────────────────────────────────────────────
+	uploads := protected.Group("/uploads")
+	uploads.Post("/", middleware.RolRequerido("organizador", "admin"), uploadH.Subir)
 
 	// ── Materiales de Evento ────────────────────────────────────────────────
 	materiales := protected.Group("/materiales")

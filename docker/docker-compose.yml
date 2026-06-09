@@ -56,7 +56,7 @@ services:
     container_name: eventos_backend
     restart: unless-stopped
     env_file:
-      - ../backend/env/.env # Load default env vars; override with .env in production
+      - ../backend/.env # Load default env vars; override with .env in production
     environment:
       DATABASE_URL: 
         host=postgres 

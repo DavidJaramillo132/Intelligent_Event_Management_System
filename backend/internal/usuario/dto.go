@@ -10,6 +10,7 @@ type RegisterInput struct {
 	Ciudad            string `json:"ciudad"`
 	Provincia         string `json:"provincia"`
 	Pais              string `json:"pais"`
+	Rol               string `json:"rol"`
 }
 
 type LoginInput struct {

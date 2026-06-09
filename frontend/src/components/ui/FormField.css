@@ -1,0 +1,41 @@
+.form-field {
+  margin-bottom: var(--space-5);
+}
+
+.form-field__label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+  color: var(--color-text);
+  margin-bottom: var(--space-1);
+}
+
+.form-field__input {
+  width: 100%;
+}
+
+.form-field__input--error {
+  border-color: var(--color-error) !important;
+}
+
+.form-field__help {
+  font-size: var(--font-size-xs);
+  color: var(--color-text-muted);
+  margin-top: var(--space-1);
+}
+
+.form-field__error {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--font-size-sm);
+  color: var(--color-error);
+  margin-top: var(--space-1);
+  font-weight: 500;
+}
+
+.form-field__error-icon {
+  font-size: 1rem;
+  line-height: 1;
+  flex-shrink: 0;
+}

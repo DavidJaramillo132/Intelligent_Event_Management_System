@@ -3,8 +3,9 @@ package inscripcion
 // ── DTOs para el paquete inscripcion ────────────────────────────────────────
 
 type CrearInscripcionInput struct {
-	EventoID    string `json:"evento_id"`
-	AsistenteID string `json:"asistente_id"`
+	EventoID      string `json:"evento_id"`
+	AsistenteID   string `json:"asistente_id"`
+	TipoEntradaID string `json:"tipo_entrada_id"`
 }
 
 type ActualizarEstadoInput struct {
