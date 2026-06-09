@@ -30,6 +30,16 @@ export default function Header() {
                   Crear Evento
                 </Link>
               )}
+              {user?.rol === 'admin' && (
+                <>
+                  <Link to="/admin/usuarios" className="header__link" id="nav-admin-users">
+                    Usuarios
+                  </Link>
+                  <Link to="/admin/auditoria" className="header__link" id="nav-admin-audit">
+                    Auditoría
+                  </Link>
+                </>
+              )}
               <span className="header__user" aria-label={`Usuario: ${user?.nombre}`}>
                 <span className="header__avatar" aria-hidden="true">
                   {user?.nombre?.charAt(0).toUpperCase()}

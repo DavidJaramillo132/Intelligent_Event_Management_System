@@ -11,6 +11,8 @@ import EventDiscoveryPage from './pages/attendee/EventDiscoveryPage';
 import EventDetailPage from './pages/attendee/EventDetailPage';
 import DigitalTicketPage from './pages/attendee/DigitalTicketPage';
 import SurveyPage from './pages/attendee/SurveyPage';
+import GestionUsuariosPage from './pages/admin/GestionUsuariosPage';
+import AuditoriaPage from './pages/admin/AuditoriaPage';
 import './App.css';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
@@ -134,6 +136,18 @@ function AppContent() {
         <Route path="/eventos/crear" element={
           <ProtectedRoute roles={['organizador', 'admin']}>
             <CreateEventPage />
+          </ProtectedRoute>
+        } />
+
+        {/* ── Módulo ADMINISTRADOR ─────────────────────────────── */}
+        <Route path="/admin/usuarios" element={
+          <ProtectedRoute roles={['admin']}>
+            <GestionUsuariosPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/admin/auditoria" element={
+          <ProtectedRoute roles={['admin']}>
+            <AuditoriaPage />
           </ProtectedRoute>
         } />
 

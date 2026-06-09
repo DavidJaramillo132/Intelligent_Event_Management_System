@@ -4,12 +4,18 @@ import (
 	"log"
 
 	"gorm.io/gorm"
+	"main.go/models"
 )
 
-// Migrate se mantiene como punto de entrada, pero el esquema real
-// se administra con el SQL de docker/db/init/001_create_tables.sql.
-// Se evita AutoMigrate porque puede chocar con constraints ya existentes.
+// Migrate aplica AutoMigrate sólo para los modelos que requieren sincronización de esquema.
+// El esquema base se gestiona con docker/db/init/001_create_tables.sql.
 func Migrate(conn *gorm.DB) {
-	_ = conn
-	log.Println("✅ Migraciones omitidas: usando schema SQL existente")
+	if err := conn.AutoMigrate(
+		&models.Usuario{},
+		&models.LogAuditoria{},
+	); err != nil {
+		log.Printf("⚠️  AutoMigrate warning: %v", err)
+	} else {
+		log.Println("✅ Migraciones completadas")
+	}
 }

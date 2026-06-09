@@ -7,6 +7,7 @@ import (
 	"github.com/golang-jwt/jwt/v5"
 	"golang.org/x/crypto/bcrypt"
 
+	"main.go/db"
 	"main.go/middleware"
 	"main.go/models"
 )
@@ -21,9 +22,24 @@ func NewService(repo *Repository) *Service {
 
 // DTOs moved to dto.go
 
-// ── MÉTODOS ──────────────────────────────────────────────────────────────────
-func (s *Service) Registrar(input RegisterInput) (*AuthResponse, error) {
-	// Validaciones
+// ── HELPERS DE AUDITORÍA ──────────────────────────────────────────────────────
+
+func registrarLog(usuarioID *string, correo, ip, accion, descripcion string) {
+	l := models.LogAuditoria{
+		UsuarioID:     usuarioID,
+		CorreoUsuario: correo,
+		IPAddress:     ip,
+		Accion:        accion,
+		Descripcion:   descripcion,
+	}
+	db.GetDB().Create(&l) // silencia errores para no bloquear el flujo principal
+}
+
+// ── MÉTODOS ───────────────────────────────────────────────────────────────────
+
+// Registrar crea un usuario. Para organizadores devuelve (nil, nil) indicando
+// que la cuenta queda pendiente de aprobación por un administrador.
+func (s *Service) Registrar(input RegisterInput, ip string) (*AuthResponse, error) {
 	if input.Nombre == "" || input.Apellido == "" || input.CorreoElectronico == "" || input.Contrasena == "" {
 		return nil, fiber.NewError(fiber.StatusBadRequest, "Nombre, apellido, correo y contraseña son requeridos")
 	}
@@ -34,7 +50,6 @@ func (s *Service) Registrar(input RegisterInput) (*AuthResponse, error) {
 		return nil, fiber.NewError(fiber.StatusConflict, "El correo ya está registrado")
 	}
 
-	// Hashear contraseña
 	hash, err := bcrypt.GenerateFromPassword([]byte(input.Contrasena), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error procesando la contraseña")
@@ -45,10 +60,13 @@ func (s *Service) Registrar(input RegisterInput) (*AuthResponse, error) {
 		pais = "Ecuador"
 	}
 
-	// Rol: whitelist, nunca admin por auto-registro
+	// Rol: whitelist. Nunca admin por auto-registro.
+	// Los organizadores quedan en estado "pendiente" hasta aprobación del admin.
 	rol := "asistente"
+	estadoCuenta := "activo"
 	if input.Rol == "organizador" {
 		rol = "organizador"
+		estadoCuenta = "pendiente"
 	}
 
 	u := &models.Usuario{
@@ -61,29 +79,51 @@ func (s *Service) Registrar(input RegisterInput) (*AuthResponse, error) {
 		Provincia:         input.Provincia,
 		Pais:              pais,
 		Rol:               rol,
+		Activo:            true,
+		EstadoCuenta:      estadoCuenta,
 	}
 
 	if err := s.repo.CrearUsuario(u); err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error creando el usuario")
 	}
 
+	uid := u.ID.String()
+	registrarLog(&uid, u.CorreoElectronico, ip, "REGISTRO",
+		"Nuevo usuario registrado: "+u.CorreoElectronico+" (rol: "+rol+")")
+
+	// Organizadores pendientes no reciben token
+	if estadoCuenta == "pendiente" {
+		return nil, nil
+	}
+
 	return s.buildAuthResponse(*u)
 }
 
-func (s *Service) Login(input LoginInput) (*AuthResponse, error) {
+func (s *Service) Login(input LoginInput, ip string) (*AuthResponse, error) {
 	if input.CorreoElectronico == "" || input.Contrasena == "" {
 		return nil, fiber.NewError(fiber.StatusBadRequest, "Correo y contraseña son requeridos")
 	}
 
 	u, err := s.repo.BuscarPorCorreo(input.CorreoElectronico)
 	if err != nil {
-		// mismo mensaje para no revelar si el correo existe o no
 		return nil, fiber.NewError(fiber.StatusUnauthorized, "Credenciales incorrectas")
 	}
 
 	if err := bcrypt.CompareHashAndPassword([]byte(u.ContrasenaHash), []byte(input.Contrasena)); err != nil {
 		return nil, fiber.NewError(fiber.StatusUnauthorized, "Credenciales incorrectas")
 	}
+
+	// Verificar estado de la cuenta
+	if !u.Activo {
+		return nil, fiber.NewError(fiber.StatusForbidden, "Tu cuenta ha sido desactivada. Contacta al administrador.")
+	}
+	if u.EstadoCuenta == "pendiente" {
+		return nil, fiber.NewError(fiber.StatusForbidden, "Tu cuenta está pendiente de aprobación por un administrador.")
+	}
+
+	uid := u.ID.String()
+	registrarLog(&uid, u.CorreoElectronico, ip, "LOGIN",
+		"Inicio de sesión: "+u.CorreoElectronico)
 
 	return s.buildAuthResponse(*u)
 }

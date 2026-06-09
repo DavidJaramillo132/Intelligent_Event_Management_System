@@ -4,11 +4,12 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 
+	"main.go/internal/admin"
 	"main.go/internal/checkin"
 	"main.go/internal/encuesta"
 	"main.go/internal/evento"
-	"main.go/internal/inscripcion"
 	"main.go/internal/ia"
+	"main.go/internal/inscripcion"
 	"main.go/internal/lugar"
 	"main.go/internal/sesion_evento"
 	"main.go/internal/tipo_entrada"
@@ -32,16 +33,17 @@ func Setup(app *fiber.App) {
 	app.Static("/uploads", "./uploads")
 
 	// ── Handlers ────────────────────────────────────────────────────────────
-	usuarioH      := usuario.NewHandler()
-	lugarH        := lugar.NewHandler()
-	tipoEventoH   := tipo_evento.NewHandler()
-	eventoH       := evento.NewHandler()
-	inscripcionH  := inscripcion.NewHandler()
-	checkinH      := checkin.NewHandler()
-	encuestaH     := encuesta.NewHandler()
-	iaH           := ia.NewHandler()
-	uploadH       := upload.NewHandler()
-	tipoEntradaH  := tipo_entrada.NewHandler()
+	adminH := admin.NewHandler()
+	usuarioH := usuario.NewHandler()
+	lugarH := lugar.NewHandler()
+	tipoEventoH := tipo_evento.NewHandler()
+	eventoH := evento.NewHandler()
+	inscripcionH := inscripcion.NewHandler()
+	checkinH := checkin.NewHandler()
+	encuestaH := encuesta.NewHandler()
+	iaH := ia.NewHandler()
+	uploadH := upload.NewHandler()
+	tipoEntradaH := tipo_entrada.NewHandler()
 	sesionEventoH := sesion_evento.NewHandler()
 
 	// ── Prefijo base ────────────────────────────────────────────────────────
@@ -164,4 +166,19 @@ func Setup(app *fiber.App) {
 	iaGroup.Post("/publico", middleware.RolRequerido("organizador", "admin"), iaH.CrearPublico)
 	iaGroup.Get("/publico/:id", iaH.ObtenerPublico)
 	iaGroup.Get("/publico/evento/:eventoId", iaH.ListarPublicoPorEvento)
+
+	// ═════════════════════════════════════════════════════════════════════════
+	// ── RUTAS DE ADMINISTRADOR ────────────────────────────────────────────────
+	// ═════════════════════════════════════════════════════════════════════════
+	adminGroup := protected.Group("/admin", middleware.RolRequerido("admin"))
+
+	// Gestión de usuarios
+	adminGroup.Get("/usuarios/pendientes", adminH.ListarPendientes)
+	adminGroup.Get("/usuarios", adminH.ListarUsuarios)
+	adminGroup.Patch("/usuarios/:id/rol", adminH.ActualizarRol)
+	adminGroup.Patch("/usuarios/:id/estado", adminH.ActualizarEstado)
+	adminGroup.Post("/usuarios/:id/aprobar", adminH.AprobarOrganizador)
+
+	// Auditoría
+	adminGroup.Get("/auditoria", adminH.ListarLogs)
 }

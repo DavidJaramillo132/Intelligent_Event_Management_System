@@ -19,9 +19,18 @@ func (h *Handler) Register(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "JSON inválido")
 	}
 
-	resp, err := h.service.Registrar(input)
+	resp, err := h.service.Registrar(input, c.IP())
 	if err != nil {
 		return err
+	}
+
+	// resp == nil indica organizador pendiente de aprobación
+	if resp == nil {
+		return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+			"ok":      true,
+			"pending": true,
+			"message": "Registro exitoso. Tu cuenta como organizador está pendiente de aprobación por un administrador.",
+		})
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
@@ -37,7 +46,7 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "JSON inválido")
 	}
 
-	resp, err := h.service.Login(input)
+	resp, err := h.service.Login(input, c.IP())
 	if err != nil {
 		return err
 	}

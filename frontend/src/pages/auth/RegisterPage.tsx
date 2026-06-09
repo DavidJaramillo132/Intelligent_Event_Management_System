@@ -10,6 +10,7 @@ export default function RegisterPage() {
   const { register, loading, error, clearError } = useAuth();
   const navigate = useNavigate();
   const [success, setSuccess] = useState(false);
+  const [pendingMsg, setPendingMsg] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     nombre: '',
@@ -49,7 +50,7 @@ export default function RegisterPage() {
     if (!validate()) return;
 
     try {
-      await register({
+      const result = await register({
         nombre: form.nombre,
         apellido: form.apellido,
         correo_electronico: form.correo,
@@ -60,8 +61,12 @@ export default function RegisterPage() {
         provincia: form.provincia || undefined,
         pais: form.pais || 'Ecuador',
       });
-      setSuccess(true);
-      setTimeout(() => navigate('/'), 1500);
+      if (result.pending) {
+        setPendingMsg(result.message ?? 'Tu cuenta como organizador está pendiente de aprobación por un administrador.');
+      } else {
+        setSuccess(true);
+        setTimeout(() => navigate('/'), 1500);
+      }
     } catch {
       // error set in context
     }
@@ -85,6 +90,13 @@ export default function RegisterPage() {
 
         {error && <AlertMessage type="error" message={error} onClose={clearError} />}
         {success && <AlertMessage type="success" message="¡Cuenta creada exitosamente! Redirigiendo..." />}
+        {pendingMsg && (
+          <AlertMessage
+            type="info"
+            message={pendingMsg}
+            onClose={() => setPendingMsg(null)}
+          />
+        )}
 
         <form onSubmit={handleSubmit} noValidate>
           <div className="auth-form__row">

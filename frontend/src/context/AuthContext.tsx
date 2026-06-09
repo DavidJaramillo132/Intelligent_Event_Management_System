@@ -25,7 +25,7 @@ interface AuthContextType {
   token: string | null;
   isAuthenticated: boolean;
   login: (correo: string, contrasena: string) => Promise<void>;
-  register: (data: RegisterData) => Promise<void>;
+  register: (data: RegisterData) => Promise<{ pending: boolean; message?: string }>;
   logout: () => void;
   loading: boolean;
   error: string | null;
@@ -91,11 +91,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setError(null);
     try {
       const res = await api.post<AuthState>('/auth/register', data);
+      // Caso organizador pendiente: backend devuelve { ok:true, pending:true, message:"..." }
+      if ((res as unknown as Record<string, unknown>).pending) {
+        const msg = ((res as unknown as Record<string, unknown>).message as string) ??
+          'Registro exitoso. Tu cuenta está pendiente de aprobación.';
+        return { pending: true, message: msg };
+      }
       if (res.data) {
         localStorage.setItem('auth', JSON.stringify(res.data));
         setUser(res.data.usuario);
         setToken(res.data.token);
       }
+      return { pending: false };
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Error al registrarse');
       throw err;
