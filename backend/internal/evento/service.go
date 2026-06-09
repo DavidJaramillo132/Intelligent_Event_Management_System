@@ -84,6 +84,19 @@ func (s *Service) ListarTodos() ([]EventoResponse, error) {
 	return resp, nil
 }
 
+func (s *Service) ListarConFiltros(filtros FiltrosEvento) ([]EventoResponse, error) {
+	eventos, err := s.repo.ListarConFiltros(filtros)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error listando eventos")
+	}
+
+	var resp []EventoResponse
+	for _, e := range eventos {
+		resp = append(resp, *toResponse(e))
+	}
+	return resp, nil
+}
+
 func (s *Service) ListarPorOrganizador(organizadorID string) ([]EventoResponse, error) {
 	eventos, err := s.repo.ListarPorOrganizador(organizadorID)
 	if err != nil {
@@ -180,10 +193,25 @@ func toResponse(e models.Evento) *EventoResponse {
 		ActualizadoEn:  e.ActualizadoEn.Format("2006-01-02T15:04:05Z07:00"),
 	}
 
-	if e.LugarID != nil {
+	// Tipo de evento nombre
+	if e.TipoEvento.ID != 0 {
+		resp.TipoEventoNombre = e.TipoEvento.Nombre
+	}
+
+	// Lugar y accesibilidad
+	if e.Lugar != nil {
+		lid := e.Lugar.ID.String()
+		resp.LugarID = &lid
+		resp.LugarNombre = e.Lugar.Nombre
+		resp.LugarDireccion = e.Lugar.Direccion
+		resp.LugarCiudad = e.Lugar.Ciudad
+		resp.AccesibilidadFisica = e.Lugar.AccesibilidadFisica
+		resp.AccesibilidadSensorial = e.Lugar.AccesibilidadSensorial
+	} else if e.LugarID != nil {
 		lid := e.LugarID.String()
 		resp.LugarID = &lid
 	}
+
 	if e.InicioRegistro != nil {
 		ir := e.InicioRegistro.Format("2006-01-02T15:04:05Z07:00")
 		resp.InicioRegistro = &ir

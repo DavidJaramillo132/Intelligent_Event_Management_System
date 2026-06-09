@@ -32,6 +32,7 @@ func (s *Service) Crear(eventoID string, input CrearSesionInput) (*SesionRespons
 		Inicio:      input.Inicio,
 		Fin:         input.Fin,
 		Ponente:     input.Ponente,
+		Sala:        input.Sala,
 		Orden:       input.Orden,
 	}
 
@@ -71,6 +72,7 @@ func toResponse(se models.SesionEvento) *SesionResponse {
 		Inicio:      se.Inicio.Format("2006-01-02T15:04:05Z07:00"),
 		Fin:         se.Fin.Format("2006-01-02T15:04:05Z07:00"),
 		Ponente:     se.Ponente,
+		Sala:        se.Sala,
 		Orden:       se.Orden,
 	}
 }

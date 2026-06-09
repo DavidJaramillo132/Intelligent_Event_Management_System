@@ -1,6 +1,9 @@
 package evento
 
 import (
+	"strconv"
+	"time"
+
 	"main.go/db"
 	"main.go/models"
 )
@@ -35,6 +38,62 @@ func (r *Repository) ListarTodos() ([]models.Evento, error) {
 		Preload("Lugar").
 		Order("creado_en DESC").
 		Find(&eventos).Error; err != nil {
+		return nil, err
+	}
+	return eventos, nil
+}
+
+// ListarConFiltros aplica filtros dinámicos de búsqueda pública
+func (r *Repository) ListarConFiltros(f FiltrosEvento) ([]models.Evento, error) {
+	var eventos []models.Evento
+	q := db.GetDB().
+		Preload("Organizador").
+		Preload("TipoEvento").
+		Preload("Lugar").
+		Order("creado_en DESC")
+
+	// Búsqueda semántica en título y descripción
+	if f.Q != "" {
+		like := "%" + f.Q + "%"
+		q = q.Where("titulo ILIKE ? OR descripcion ILIKE ?", like, like)
+	}
+
+	// Filtro por tipo de evento
+	if f.TipoEventoID != "" {
+		q = q.Where("tipo_evento_id = ?", f.TipoEventoID)
+	}
+
+	// Filtro por rango de fechas
+	if f.FechaInicio != "" {
+		if t, err := time.Parse("2006-01-02", f.FechaInicio); err == nil {
+			q = q.Where("inicio >= ?", t)
+		}
+	}
+	if f.FechaFin != "" {
+		if t, err := time.Parse("2006-01-02", f.FechaFin); err == nil {
+			q = q.Where("fin <= ?", t.Add(24*time.Hour))
+		}
+	}
+
+	// Filtro por rango de precios
+	if f.CostoMin != "" {
+		if v, err := strconv.ParseFloat(f.CostoMin, 64); err == nil {
+			q = q.Where("costo >= ?", v)
+		}
+	}
+	if f.CostoMax != "" {
+		if v, err := strconv.ParseFloat(f.CostoMax, 64); err == nil {
+			q = q.Where("costo <= ?", v)
+		}
+	}
+
+	// Filtro de solo accesibles (JOIN con lugares)
+	if f.SoloAccesibles {
+		q = q.Joins("JOIN lugares ON lugares.id = eventos.lugar_id").
+			Where("lugares.accesibilidad_fisica = true OR lugares.accesibilidad_sensorial = true")
+	}
+
+	if err := q.Find(&eventos).Error; err != nil {
 		return nil, err
 	}
 	return eventos, nil

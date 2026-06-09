@@ -107,3 +107,12 @@ func (r *Repository) BuscarRespuestaEncuestaPorID(id int64) (*models.RespuestaEn
 	}
 	return &re, nil
 }
+
+// ExisteRespuesta verifica si ya existe una respuesta de un asistente (via inscripcion_id)
+func (r *Repository) ExisteRespuesta(encuestaID int64, inscripcionID string) (bool, error) {
+	var count int64
+	err := db.GetDB().Model(&models.RespuestaEncuesta{}).
+		Where("encuesta_id = ? AND inscripcion_id = ?", encuestaID, inscripcionID).
+		Count(&count).Error
+	return count > 0, err
+}

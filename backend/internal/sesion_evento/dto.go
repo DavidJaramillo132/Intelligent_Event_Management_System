@@ -8,6 +8,7 @@ type CrearSesionInput struct {
 	Inicio      time.Time `json:"inicio"`
 	Fin         time.Time `json:"fin"`
 	Ponente     string    `json:"ponente,omitempty"`
+	Sala        string    `json:"sala,omitempty"`
 	Orden       int       `json:"orden"`
 }
 
@@ -19,5 +20,6 @@ type SesionResponse struct {
 	Inicio      string `json:"inicio"`
 	Fin         string `json:"fin"`
 	Ponente     string `json:"ponente,omitempty"`
+	Sala        string `json:"sala,omitempty"`
 	Orden       int    `json:"orden"`
 }

@@ -124,6 +124,14 @@ func (s *Service) EnviarRespuesta(input EnviarRespuestaInput) (*RespuestaEncuest
 	if !enc.Activo {
 		return nil, fiber.NewError(fiber.StatusBadRequest, "La encuesta no está activa")
 	}
+
+	// ── Control anti-duplicados ────────────────────────────────────────────
+	if input.InscripcionID != nil {
+		if ya, _ := s.repo.ExisteRespuesta(input.EncuestaID, *input.InscripcionID); ya {
+			return nil, fiber.NewError(fiber.StatusConflict, "Ya has respondido esta encuesta")
+		}
+	}
+
 	re := &models.RespuestaEncuesta{EncuestaID: input.EncuestaID}
 	if input.InscripcionID != nil {
 		inscUUID, err := uuid.Parse(*input.InscripcionID)

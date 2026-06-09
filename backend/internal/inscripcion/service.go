@@ -41,9 +41,10 @@ func (s *Service) Crear(input CrearInscripcionInput) (*InscripcionResponse, erro
 	}
 
 	i := &models.Inscripcion{
-		EventoID:    eventoUUID,
-		AsistenteID: asistenteUUID,
-		Estado:      "inscrito",
+		EventoID:                    eventoUUID,
+		AsistenteID:                 asistenteUUID,
+		RequerimientosAccesibilidad: input.RequerimientosAccesibilidad,
+		Estado:                      "inscrito",
 	}
 
 	if err := s.repo.Crear(i); err != nil {
@@ -168,11 +169,12 @@ func generarCodigoBoleto() string {
 
 func toResponse(i models.Inscripcion, b *models.Boleto) *InscripcionResponse {
 	resp := &InscripcionResponse{
-		ID:           i.ID.String(),
-		EventoID:     i.EventoID.String(),
-		AsistenteID:  i.AsistenteID.String(),
-		Estado:       i.Estado,
-		RegistradoEn: i.RegistradoEn.Format("2006-01-02T15:04:05Z07:00"),
+		ID:                          i.ID.String(),
+		EventoID:                    i.EventoID.String(),
+		AsistenteID:                 i.AsistenteID.String(),
+		Estado:                      i.Estado,
+		RequerimientosAccesibilidad: i.RequerimientosAccesibilidad,
+		RegistradoEn:                i.RegistradoEn.Format("2006-01-02T15:04:05Z07:00"),
 	}
 
 	if i.ConfirmadoEn != nil {

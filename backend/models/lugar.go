@@ -14,9 +14,11 @@ type Lugar struct {
 	Provincia     string    `gorm:"type:varchar(100)"                               json:"provincia,omitempty"`
 	Pais          string    `gorm:"type:varchar(100);not null;default:'Ecuador'"    json:"pais"`
 	Capacidad     int       `gorm:"not null"                                        json:"capacidad"`
-	Descripcion   string    `gorm:"type:text"                                       json:"descripcion,omitempty"`
-	CreadoEn      time.Time `gorm:"autoCreateTime"                                  json:"creado_en"`
-	ActualizadoEn time.Time `gorm:"autoUpdateTime"                                  json:"actualizado_en"`
+	Descripcion            string    `gorm:"type:text"                                       json:"descripcion,omitempty"`
+	AccesibilidadFisica    bool      `gorm:"not null;default:false"                          json:"accesibilidad_fisica"`
+	AccesibilidadSensorial bool      `gorm:"not null;default:false"                          json:"accesibilidad_sensorial"`
+	CreadoEn               time.Time `gorm:"autoCreateTime"                                  json:"creado_en"`
+	ActualizadoEn          time.Time `gorm:"autoUpdateTime"                                  json:"actualizado_en"`
 
 	// Relaciones
 	Eventos []Evento `gorm:"foreignKey:LugarID" json:"-"`

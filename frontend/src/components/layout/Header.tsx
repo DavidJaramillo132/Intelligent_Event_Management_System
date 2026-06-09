@@ -20,6 +20,9 @@ export default function Header() {
         </Link>
 
         <nav className="header__nav" aria-label="Navegación principal">
+          <Link to="/eventos" className="header__link" id="nav-explore-events">
+            🔍 Explorar eventos
+          </Link>
           {isAuthenticated ? (
             <>
               {(user?.rol === 'organizador' || user?.rol === 'admin') && (

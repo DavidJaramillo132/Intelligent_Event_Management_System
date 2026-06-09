@@ -14,6 +14,7 @@ type SesionEvento struct {
 	Inicio      time.Time `gorm:"not null"                                        json:"inicio"`
 	Fin         time.Time `gorm:"not null"                                        json:"fin"`
 	Ponente     string    `gorm:"type:varchar(150)"                               json:"ponente,omitempty"`
+	Sala        string    `gorm:"type:varchar(150)"                               json:"sala,omitempty"`
 	Orden       int       `gorm:"not null;default:0"                              json:"orden"`
 
 	// Relaciones

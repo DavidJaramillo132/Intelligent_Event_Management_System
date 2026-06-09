@@ -57,6 +57,17 @@ func Setup(app *fiber.App) {
 	auth.Post("/login", usuarioH.Login)
 	auth.Post("/refresh", usuarioH.Refresh)
 
+	// ── Rutas públicas de eventos (sin JWT) ──────────────────────────────────
+	publicEventos := api.Group("/eventos")
+	publicEventos.Get("/", eventoH.Listar)
+	publicEventos.Get("/:id", eventoH.ObtenerPorID)
+	publicEventos.Get("/:eventoId/sesiones", sesionEventoH.ListarPorEvento)
+	publicEventos.Get("/:eventoId/tipos-entrada", tipoEntradaH.ListarPorEvento)
+	publicEventos.Get("/:eventoId/disponibilidad", tipoEntradaH.Disponibilidad)
+
+	// Tipos de evento públicos (para filtros de búsqueda)
+	api.Get("/tipos-evento", tipoEventoH.Listar)
+
 	// ═════════════════════════════════════════════════════════════════════════
 	// ── RUTAS PROTEGIDAS (requieren JWT) ─────────────────────────────────────
 	// ═════════════════════════════════════════════════════════════════════════
@@ -71,30 +82,24 @@ func Setup(app *fiber.App) {
 	lugares.Put("/:id", middleware.RolRequerido("organizador", "admin"), lugarH.Actualizar)
 	lugares.Delete("/:id", middleware.RolRequerido("admin"), lugarH.Eliminar)
 
-	// ── Tipos de Evento ─────────────────────────────────────────────────────
+	// ── Tipos de Evento (protegidos: edición) ────────────────────────────────
 	tiposEvento := protected.Group("/tipos-evento")
-	tiposEvento.Get("/", tipoEventoH.Listar)
 	tiposEvento.Get("/:id", tipoEventoH.ObtenerPorID)
 	tiposEvento.Post("/", middleware.RolRequerido("organizador", "admin"), tipoEventoH.Crear)
 	tiposEvento.Put("/:id", middleware.RolRequerido("organizador", "admin"), tipoEventoH.Actualizar)
 	tiposEvento.Delete("/:id", middleware.RolRequerido("admin"), tipoEventoH.Eliminar)
 
-	// ── Eventos ─────────────────────────────────────────────────────────────
+	// ── Eventos (protegidos: crear/editar/borrar) ─────────────────────────────
 	eventos := protected.Group("/eventos")
-	eventos.Get("/", eventoH.Listar)
-	eventos.Get("/:id", eventoH.ObtenerPorID)
 	eventos.Get("/organizador/:organizadorId", eventoH.ListarPorOrganizador)
 	eventos.Post("/", middleware.RolRequerido("organizador", "admin"), eventoH.Crear)
 	eventos.Put("/:id", middleware.RolRequerido("organizador", "admin"), eventoH.Actualizar)
 	eventos.Delete("/:id", middleware.RolRequerido("organizador", "admin"), eventoH.Eliminar)
 
-	// ── Tipos de Entrada (sub-recurso de evento) ────────────────────────────
-	eventos.Get("/:eventoId/tipos-entrada", tipoEntradaH.ListarPorEvento)
+	// ── Tipos de Entrada (sub-recurso de evento, escritura protegida) ────────
 	eventos.Post("/:eventoId/tipos-entrada", middleware.RolRequerido("organizador", "admin"), tipoEntradaH.Crear)
-	eventos.Get("/:eventoId/disponibilidad", tipoEntradaH.Disponibilidad)
 
-	// ── Sesiones de Evento (sub-recurso de evento) ──────────────────────────
-	eventos.Get("/:eventoId/sesiones", sesionEventoH.ListarPorEvento)
+	// ── Sesiones de Evento (escritura protegida) ─────────────────────────────
 	eventos.Post("/:eventoId/sesiones", middleware.RolRequerido("organizador", "admin"), sesionEventoH.Crear)
 
 	// ── Sesiones (edición/eliminación directa) ──────────────────────────────

@@ -7,6 +7,10 @@ import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import CreateEventPage from './pages/events/CreateEventPage';
 import EventRegistrationPage from './pages/registration/EventRegistrationPage';
+import EventDiscoveryPage from './pages/attendee/EventDiscoveryPage';
+import EventDetailPage from './pages/attendee/EventDetailPage';
+import DigitalTicketPage from './pages/attendee/DigitalTicketPage';
+import SurveyPage from './pages/attendee/SurveyPage';
 import './App.css';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
@@ -40,16 +44,22 @@ function HomePage() {
                       🚀 Crear un Evento
                     </a>
                   )}
+                  <a href="/eventos" className="btn btn-secondary btn-lg" id="hero-explore">
+                    🔍 Explorar Eventos
+                  </a>
                   <p className="home-hero__welcome">
                     ¡Bienvenido, <strong>{user?.nombre}</strong>! Rol: <strong>{user?.rol}</strong>
                   </p>
                 </>
               ) : (
                 <>
-                  <a href="/registro" className="btn btn-primary btn-lg" id="hero-register">
+                  <a href="/eventos" className="btn btn-primary btn-lg" id="hero-explore-public">
+                    🔍 Explorar Eventos
+                  </a>
+                  <a href="/registro" className="btn btn-secondary btn-lg" id="hero-register">
                     Comenzar Gratis
                   </a>
-                  <a href="/login" className="btn btn-secondary btn-lg" id="hero-login">
+                  <a href="/login" className="btn btn-ghost btn-lg" id="hero-login">
                     Iniciar Sesión
                   </a>
                 </>
@@ -61,9 +71,10 @@ function HomePage() {
 
       <section className="home-features container" aria-label="Características principales">
         {[
-          { icon: '📝', title: 'Registro Simple', desc: 'Crea tu cuenta en segundos con un formulario guiado y accesible.' },
+          { icon: '🔍', title: 'Descubrimiento Público', desc: 'Explora eventos sin necesidad de cuenta. Filtra por categoría, fecha, precio y accesibilidad.' },
           { icon: '🎯', title: 'Gestión Inteligente', desc: 'Configura cada detalle: agenda, tipos de entrada, capacidad y más.' },
           { icon: '♿', title: 'Accesibilidad Total', desc: 'Diseñado bajo estándares WCAG 2.2 AA para todos los usuarios.' },
+          { icon: '🎫', title: 'Boleto Digital QR', desc: 'Recibe tu boleto digital con código QR. Disponible offline sin internet.' },
         ].map((feat, i) => (
           <div key={i} className="home-feature card animate-fade-in">
             <span className="home-feature__icon" aria-hidden="true">{feat.icon}</span>
@@ -79,24 +90,55 @@ function HomePage() {
 function AppContent() {
   return (
     <>
-      <a href="#main-content" className="sr-only" style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden' }}>
+      <a
+        href="#main-content"
+        className="sr-only"
+        style={{ position: 'absolute', left: '-9999px', top: 'auto', width: '1px', height: '1px', overflow: 'hidden' }}
+      >
         Saltar al contenido principal
       </a>
       <Header />
       <Routes>
+        {/* ── Rutas Públicas ───────────────────────────────────── */}
         <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/registro" element={<RegisterPage />} />
-        <Route path="/eventos/crear" element={
-          <ProtectedRoute roles={['organizador', 'admin']}>
-            <CreateEventPage />
-          </ProtectedRoute>
-        } />
+
+        {/* ── Módulo ASISTENTE — Público ───────────────────────── */}
+        <Route path="/eventos" element={<EventDiscoveryPage />} />
+        <Route path="/eventos/:eventoId" element={<EventDetailPage />} />
+
+        {/* ── Módulo ASISTENTE — Protegido ─────────────────────── */}
         <Route path="/eventos/:eventoId/inscripcion" element={
           <ProtectedRoute>
             <EventRegistrationPage />
           </ProtectedRoute>
         } />
+        <Route path="/mi-boleto/:inscripcionId" element={
+          <ProtectedRoute>
+            <DigitalTicketPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/eventos/:eventoId/encuesta" element={
+          <ProtectedRoute>
+            <SurveyPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/eventos/:eventoId/encuesta/:inscripcionId" element={
+          <ProtectedRoute>
+            <SurveyPage />
+          </ProtectedRoute>
+        } />
+
+        {/* ── Módulo ORGANIZADOR ───────────────────────────────── */}
+        <Route path="/eventos/crear" element={
+          <ProtectedRoute roles={['organizador', 'admin']}>
+            <CreateEventPage />
+          </ProtectedRoute>
+        } />
+
+        {/* ── Catch-all ────────────────────────────────────────── */}
+        <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
       <Footer />
       <AccessibilityMenu />
