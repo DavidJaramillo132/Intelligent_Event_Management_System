@@ -417,6 +417,7 @@
   line-height: 1.6;
   display: -webkit-box;
   -webkit-line-clamp: 2;
+  line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
   margin: 0;
@@ -1202,7 +1203,6 @@
 .survey-question__required {
   color: var(--color-error);
   margin-left: var(--space-1);
-  aria-hidden: true;
 }
 
 /* Star Rating */

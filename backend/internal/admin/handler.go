@@ -34,21 +34,24 @@ func (h *Handler) ListarUsuarios(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{"ok": true, "data": result})
 }
 
-// GET /api/v1/admin/usuarios/pendientes
-func (h *Handler) ListarPendientes(c *fiber.Ctx) error {
-	pagina, _ := strconv.Atoi(c.Query("pagina", "1"))
-	limite, _ := strconv.Atoi(c.Query("limite", "20"))
+// POST /api/v1/admin/usuarios
+func (h *Handler) CrearUsuario(c *fiber.Ctx) error {
+	adminID, _ := c.Locals("usuario_id").(string)
 
-	result, err := h.service.ListarUsuarios(ListarUsuariosParams{
-		Pagina: pagina,
-		Limite: limite,
-		Rol:    "organizador",
-		Estado: "pendiente",
-	})
+	var input CrearUsuarioInput
+	if err := c.BodyParser(&input); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "JSON inválido")
+	}
+
+	result, err := h.service.CrearUsuario(adminID, input, c.IP())
 	if err != nil {
 		return err
 	}
-	return c.JSON(fiber.Map{"ok": true, "data": result})
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"ok":      true,
+		"message": "Usuario creado correctamente",
+		"data":    result,
+	})
 }
 
 // PATCH /api/v1/admin/usuarios/:id/rol
@@ -81,17 +84,6 @@ func (h *Handler) ActualizarEstado(c *fiber.Ctx) error {
 		return err
 	}
 	return c.JSON(fiber.Map{"ok": true, "message": "Estado actualizado correctamente"})
-}
-
-// POST /api/v1/admin/usuarios/:id/aprobar
-func (h *Handler) AprobarOrganizador(c *fiber.Ctx) error {
-	targetID := c.Params("id")
-	adminID, _ := c.Locals("usuario_id").(string)
-
-	if err := h.service.AprobarOrganizador(adminID, targetID, c.IP()); err != nil {
-		return err
-	}
-	return c.JSON(fiber.Map{"ok": true, "message": "Organizador aprobado correctamente"})
 }
 
 // GET /api/v1/admin/auditoria

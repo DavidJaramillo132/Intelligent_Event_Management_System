@@ -45,6 +45,9 @@ COPY --from=builder /app/main .
 # Change ownership to non-root user
 RUN chown -R eventos:eventos /app
 
+# Create uploads directory with correct ownership
+RUN mkdir -p /app/uploads && chown -R eventos:eventos /app/uploads
+
 # Switch to non-root user
 USER eventos
 

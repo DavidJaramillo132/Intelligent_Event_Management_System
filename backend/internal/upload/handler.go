@@ -36,7 +36,7 @@ func (h *Handler) Subir(c *fiber.Ctx) error {
 	}
 
 	// Crear directorio de uploads si no existe
-	uploadDir := "./uploads"
+	uploadDir := "/app/uploads"
 	if err := os.MkdirAll(uploadDir, 0755); err != nil {
 		return fiber.NewError(fiber.StatusInternalServerError, "Error creando directorio de uploads")
 	}

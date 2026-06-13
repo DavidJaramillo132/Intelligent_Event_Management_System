@@ -2,6 +2,7 @@ package admin
 
 import (
 	"github.com/gofiber/fiber/v2"
+	"golang.org/x/crypto/bcrypt"
 	"main.go/models"
 )
 
@@ -94,24 +95,55 @@ func (s *Service) ActualizarEstado(adminID, targetID string, activo bool, ip str
 	return nil
 }
 
-func (s *Service) AprobarOrganizador(adminID, targetID, ip string) error {
-	target, err := s.repo.ObtenerPorID(targetID)
-	if err != nil {
-		return fiber.NewError(fiber.StatusNotFound, "Usuario no encontrado")
+func (s *Service) CrearUsuario(adminID string, input CrearUsuarioInput, ip string) (*UsuarioAdminItem, error) {
+	if input.Nombre == "" || input.Apellido == "" || input.CorreoElectronico == "" || input.Contrasena == "" {
+		return nil, fiber.NewError(fiber.StatusBadRequest, "Nombre, apellido, correo y contraseña son requeridos")
+	}
+	if len(input.Contrasena) < 6 {
+		return nil, fiber.NewError(fiber.StatusBadRequest, "La contraseña debe tener al menos 6 caracteres")
+	}
+	if s.repo.ExisteCorreo(input.CorreoElectronico) {
+		return nil, fiber.NewError(fiber.StatusConflict, "El correo ya está registrado")
 	}
 
-	if err := s.repo.AprobarOrganizador(targetID); err != nil {
-		return fiber.NewError(fiber.StatusInternalServerError, "Error aprobando al organizador")
+	rol := "asistente"
+	if rolesValidos[input.Rol] {
+		rol = input.Rol
+	}
+
+	// Hashear contraseña inline para no importar bcrypt aquí, o reusar la de `usuario`...
+	// Es mejor importar bcrypt: "golang.org/x/crypto/bcrypt"
+	// Lo agregaré en los imports.
+	hash, err := bcrypt.GenerateFromPassword([]byte(input.Contrasena), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error procesando la contraseña")
+	}
+
+	u := &models.Usuario{
+		Nombre:            input.Nombre,
+		Apellido:          input.Apellido,
+		CorreoElectronico: input.CorreoElectronico,
+		ContrasenaHash:    string(hash),
+		Pais:              "Ecuador",
+		Rol:               rol,
+		Activo:            true,
+		EstadoCuenta:      "activo",
+	}
+
+	if err := s.repo.CrearUsuario(u); err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error creando el usuario")
 	}
 
 	s.repo.CrearLog(&models.LogAuditoria{
 		UsuarioID:     &adminID,
-		CorreoUsuario: target.CorreoElectronico,
+		CorreoUsuario: u.CorreoElectronico,
 		IPAddress:     ip,
-		Accion:        "APROBACION_ORGANIZADOR",
-		Descripcion:   "Organizador aprobado: " + target.CorreoElectronico,
+		Accion:        "CREACION_USUARIO",
+		Descripcion:   "Administrador creó un usuario: " + u.CorreoElectronico + " (rol: " + rol + ")",
 	})
-	return nil
+
+	item := toAdminItem(*u)
+	return &item, nil
 }
 
 // ─── Auditoría ────────────────────────────────────────────────────────────────

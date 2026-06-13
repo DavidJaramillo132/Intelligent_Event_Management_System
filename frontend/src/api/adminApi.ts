@@ -69,17 +69,14 @@ export const adminApi = {
       `/admin/usuarios${buildQuery(filtros as Record<string, string | number>)}`
     ),
 
-  listarPendientes: () =>
-    apiRequest<PaginatedUsuarios>('/admin/usuarios/pendientes'),
+  crearUsuario: (data: { nombre: string; apellido: string; correo_electronico: string; contrasena: string; rol: string }) =>
+    apiRequest<UsuarioAdmin>(`/admin/usuarios`, { method: 'POST', body: data }),
 
   actualizarRol: (id: string, rol: string) =>
     apiRequest<void>(`/admin/usuarios/${id}/rol`, { method: 'PATCH', body: { rol } }),
 
   actualizarEstado: (id: string, activo: boolean) =>
     apiRequest<void>(`/admin/usuarios/${id}/estado`, { method: 'PATCH', body: { activo } }),
-
-  aprobarOrganizador: (id: string) =>
-    apiRequest<void>(`/admin/usuarios/${id}/aprobar`, { method: 'POST' }),
 
   listarLogs: (filtros: FiltrosAuditoria = {}) =>
     apiRequest<PaginatedLogs>(

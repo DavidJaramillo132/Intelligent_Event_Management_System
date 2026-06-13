@@ -66,14 +66,14 @@ func (r *Repository) ActualizarEstado(id string, activo bool) error {
 		Updates(map[string]interface{}{"activo": activo}).Error
 }
 
-func (r *Repository) AprobarOrganizador(id string) error {
-	res := db.GetDB().Model(&models.Usuario{}).
-		Where("id = ? AND rol = 'organizador' AND estado_cuenta = 'pendiente'", id).
-		Updates(map[string]interface{}{"estado_cuenta": "activo"})
-	if res.Error != nil {
-		return res.Error
-	}
-	return nil
+func (r *Repository) ExisteCorreo(correo string) bool {
+	var count int64
+	db.GetDB().Model(&models.Usuario{}).Where("correo_electronico = ?", correo).Count(&count)
+	return count > 0
+}
+
+func (r *Repository) CrearUsuario(u *models.Usuario) error {
+	return db.GetDB().Create(u).Error
 }
 
 // ─── Auditoría ────────────────────────────────────────────────────────────────

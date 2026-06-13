@@ -31,6 +31,14 @@ type ActualizarEstadoInput struct {
 	Activo bool `json:"activo"`
 }
 
+type CrearUsuarioInput struct {
+	Nombre            string `json:"nombre"`
+	Apellido          string `json:"apellido"`
+	CorreoElectronico string `json:"correo_electronico"`
+	Contrasena        string `json:"contrasena"`
+	Rol               string `json:"rol"`
+}
+
 type PaginatedUsuarios struct {
 	Data   []UsuarioAdminItem `json:"data"`
 	Total  int64              `json:"total"`

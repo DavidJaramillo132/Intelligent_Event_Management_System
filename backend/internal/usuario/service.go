@@ -60,14 +60,9 @@ func (s *Service) Registrar(input RegisterInput, ip string) (*AuthResponse, erro
 		pais = "Ecuador"
 	}
 
-	// Rol: whitelist. Nunca admin por auto-registro.
-	// Los organizadores quedan en estado "pendiente" hasta aprobación del admin.
+	// Rol: forzado a asistente en registro público.
 	rol := "asistente"
 	estadoCuenta := "activo"
-	if input.Rol == "organizador" {
-		rol = "organizador"
-		estadoCuenta = "pendiente"
-	}
 
 	u := &models.Usuario{
 		Nombre:            input.Nombre,
@@ -91,11 +86,6 @@ func (s *Service) Registrar(input RegisterInput, ip string) (*AuthResponse, erro
 	registrarLog(&uid, u.CorreoElectronico, ip, "REGISTRO",
 		"Nuevo usuario registrado: "+u.CorreoElectronico+" (rol: "+rol+")")
 
-	// Organizadores pendientes no reciben token
-	if estadoCuenta == "pendiente" {
-		return nil, nil
-	}
-
 	return s.buildAuthResponse(*u)
 }
 
@@ -116,9 +106,6 @@ func (s *Service) Login(input LoginInput, ip string) (*AuthResponse, error) {
 	// Verificar estado de la cuenta
 	if !u.Activo {
 		return nil, fiber.NewError(fiber.StatusForbidden, "Tu cuenta ha sido desactivada. Contacta al administrador.")
-	}
-	if u.EstadoCuenta == "pendiente" {
-		return nil, fiber.NewError(fiber.StatusForbidden, "Tu cuenta está pendiente de aprobación por un administrador.")
 	}
 
 	uid := u.ID.String()

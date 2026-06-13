@@ -3,13 +3,12 @@ import { useAuth } from '../../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import AlertMessage from '../../components/ui/AlertMessage';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
-import { adminApi, type UsuarioAdmin, type PaginatedUsuarios } from '../../api/adminApi';
+import { adminApi, type UsuarioAdmin } from '../../api/adminApi';
 import './GestionUsuarios.css';
 
 type ConfirmPayload =
   | { type: 'rol'; usuario: UsuarioAdmin; nuevoRol: string }
-  | { type: 'estado'; usuario: UsuarioAdmin; nuevoActivo: boolean }
-  | { type: 'aprobar'; usuario: UsuarioAdmin };
+  | { type: 'estado'; usuario: UsuarioAdmin; nuevoActivo: boolean };
 
 // ── Modal de confirmación accesible ──────────────────────────────────────────
 function ConfirmModal({
@@ -76,11 +75,6 @@ function ConfirmModal({
       : `¿Desactivar la cuenta de "${payload.usuario.nombre} ${payload.usuario.apellido}"? El usuario no podrá iniciar sesión.`;
     confirmLabel = payload.nuevoActivo ? 'Activar' : 'Desactivar';
     confirmClass = payload.nuevoActivo ? 'btn btn-primary' : 'btn btn-danger';
-  } else {
-    title = 'Aprobar organizador';
-    description = `¿Aprobar la cuenta de "${payload.usuario.nombre} ${payload.usuario.apellido}" como organizador?`;
-    confirmLabel = 'Aprobar';
-    confirmClass = 'btn btn-success';
   }
 
   return (
@@ -129,7 +123,6 @@ export default function GestionUsuariosPage() {
   const { user, isAuthenticated } = useAuth();
 
   // ── Estado ─────────────────────────────────────────────────────────────────
-  const [activeTab, setActiveTab] = useState<'todos' | 'pendientes'>('todos');
   const [usuarios, setUsuarios] = useState<UsuarioAdmin[]>([]);
   const [paginacion, setPaginacion] = useState({ total: 0, pagina: 1, limite: 20 });
   const [loading, setLoading] = useState(false);
@@ -137,6 +130,7 @@ export default function GestionUsuariosPage() {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [confirmPayload, setConfirmPayload] = useState<ConfirmPayload | null>(null);
+  const [showCrearUsuario, setShowCrearUsuario] = useState(false);
 
   const [filtros, setFiltros] = useState({ busqueda: '', rol: '', estado: '' });
   const [busquedaInput, setBusquedaInput] = useState('');
@@ -152,16 +146,11 @@ export default function GestionUsuariosPage() {
     setLoading(true);
     setError(null);
     try {
-      let res: { data?: PaginatedUsuarios };
-      if (activeTab === 'pendientes') {
-        res = await adminApi.listarPendientes();
-      } else {
-        res = await adminApi.listarUsuarios({
-          pagina,
-          limite: paginacion.limite,
-          ...filtros,
-        });
-      }
+      const res = await adminApi.listarUsuarios({
+        pagina,
+        limite: paginacion.limite,
+        ...filtros,
+      });
       if (res.data) {
         setUsuarios(res.data.data);
         setPaginacion({ total: res.data.total, pagina: res.data.pagina, limite: res.data.limite });
@@ -171,11 +160,11 @@ export default function GestionUsuariosPage() {
     } finally {
       setLoading(false);
     }
-  }, [activeTab, filtros, paginacion.limite]);
+  }, [filtros, paginacion.limite]);
 
   useEffect(() => {
     cargarUsuarios(1);
-  }, [activeTab, filtros]);
+  }, [filtros]);
 
   // Debounce para búsqueda
   const handleBusqueda = (val: string) => {
@@ -196,10 +185,6 @@ export default function GestionUsuariosPage() {
     setConfirmPayload({ type: 'estado', usuario, nuevoActivo: !usuario.activo });
   };
 
-  const solicitarAprobacion = (usuario: UsuarioAdmin) => {
-    setConfirmPayload({ type: 'aprobar', usuario });
-  };
-
   const ejecutarAccion = async () => {
     if (!confirmPayload) return;
     const id = confirmPayload.usuario.id;
@@ -213,9 +198,6 @@ export default function GestionUsuariosPage() {
       } else if (confirmPayload.type === 'estado') {
         await adminApi.actualizarEstado(id, confirmPayload.nuevoActivo);
         setSuccess(`Cuenta ${confirmPayload.nuevoActivo ? 'activada' : 'desactivada'}`);
-      } else {
-        await adminApi.aprobarOrganizador(id);
-        setSuccess(`Organizador ${confirmPayload.usuario.nombre} aprobado`);
       }
       await cargarUsuarios(paginacion.pagina);
     } catch (err) {
@@ -233,6 +215,28 @@ export default function GestionUsuariosPage() {
     cargarUsuarios(p);
   };
 
+  const handleCrearUsuario = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const data = {
+      nombre: formData.get('nombre') as string,
+      apellido: formData.get('apellido') as string,
+      correo_electronico: formData.get('correo') as string,
+      contrasena: formData.get('contrasena') as string,
+      rol: formData.get('rol') as string,
+    };
+    
+    setError(null);
+    try {
+      await adminApi.crearUsuario(data);
+      setSuccess('Usuario creado exitosamente.');
+      setShowCrearUsuario(false);
+      cargarUsuarios(1);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Error al crear usuario');
+    }
+  };
+
   // ── Render ─────────────────────────────────────────────────────────────────
   return (
     <main className="admin-page" id="main-content">
@@ -246,6 +250,14 @@ export default function GestionUsuariosPage() {
             </p>
           </div>
           <div className="admin-page__stats" aria-label="Estadísticas">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setShowCrearUsuario(true)}
+              aria-label="Registrar un nuevo usuario"
+            >
+              + Crear Usuario
+            </button>
             <span className="admin-stat">
               <span className="admin-stat__value">{paginacion.total}</span>
               <span className="admin-stat__label">Total</span>
@@ -257,34 +269,8 @@ export default function GestionUsuariosPage() {
         {error && <AlertMessage type="error" message={error} onClose={() => setError(null)} />}
         {success && <AlertMessage type="success" message={success} onClose={() => setSuccess(null)} />}
 
-        {/* Pestañas */}
-        <div className="admin-tabs" role="tablist" aria-label="Vistas de usuarios">
-          <button
-            role="tab"
-            aria-selected={activeTab === 'todos'}
-            aria-controls="tab-panel-todos"
-            id="tab-todos"
-            className={`admin-tab ${activeTab === 'todos' ? 'admin-tab--active' : ''}`}
-            onClick={() => setActiveTab('todos')}
-          >
-            Todos los usuarios
-          </button>
-          <button
-            role="tab"
-            aria-selected={activeTab === 'pendientes'}
-            aria-controls="tab-panel-pendientes"
-            id="tab-pendientes"
-            className={`admin-tab ${activeTab === 'pendientes' ? 'admin-tab--active' : ''}`}
-            onClick={() => setActiveTab('pendientes')}
-          >
-            Organizadores pendientes
-            <span className="admin-tab__badge" aria-label="pendientes de aprobación">!</span>
-          </button>
-        </div>
-
-        {/* Filtros (solo en pestaña "todos") */}
-        {activeTab === 'todos' && (
-          <div className="admin-filters" role="search" aria-label="Filtros de usuarios">
+        {/* Filtros */}
+        <div className="admin-filters" role="search" aria-label="Filtros de usuarios">
             <div className="admin-filters__field">
               <label htmlFor="filter-busqueda" className="admin-filters__label">
                 Buscar usuario
@@ -340,13 +326,11 @@ export default function GestionUsuariosPage() {
               </button>
             )}
           </div>
-        )}
 
         {/* Tabla */}
         <div
-          id={activeTab === 'todos' ? 'tab-panel-todos' : 'tab-panel-pendientes'}
-          role="tabpanel"
-          aria-labelledby={activeTab === 'todos' ? 'tab-todos' : 'tab-pendientes'}
+          role="region"
+          aria-label="Lista de usuarios"
           className="admin-table-wrap"
         >
           {loading ? (
@@ -356,9 +340,7 @@ export default function GestionUsuariosPage() {
             </div>
           ) : usuarios.length === 0 ? (
             <p className="admin-empty" role="status">
-              {activeTab === 'pendientes'
-                ? 'No hay organizadores pendientes de aprobación.'
-                : 'No se encontraron usuarios con los filtros aplicados.'}
+              No se encontraron usuarios con los filtros aplicados.
             </p>
           ) : (
             <table className="admin-table" aria-label="Lista de usuarios">
@@ -370,7 +352,6 @@ export default function GestionUsuariosPage() {
                   <th scope="col">Estado cuenta</th>
                   <th scope="col">Activo</th>
                   <th scope="col">Registro</th>
-                  {activeTab === 'pendientes' && <th scope="col">Acción</th>}
                 </tr>
               </thead>
               <tbody>
@@ -392,32 +373,21 @@ export default function GestionUsuariosPage() {
                         </a>
                       </td>
                       <td data-label="Rol">
-                        {activeTab === 'todos' ? (
-                          <label
-                            htmlFor={`rol-${u.id}`}
-                            className="sr-only"
-                          >
-                            Rol de {u.nombre} {u.apellido}
-                          </label>
-                        ) : null}
-                        {activeTab === 'todos' ? (
-                          <select
-                            id={`rol-${u.id}`}
-                            className="admin-table__rol-select"
-                            value={u.rol}
-                            disabled={isLoading}
-                            onChange={(e) => solicitarCambioRol(u, e.target.value)}
-                            aria-label={`Cambiar rol de ${u.nombre} ${u.apellido}`}
-                          >
-                            <option value="asistente">Asistente</option>
-                            <option value="organizador">Organizador</option>
-                            <option value="admin">Administrador</option>
-                          </select>
-                        ) : (
-                          <span className={`admin-badge admin-badge--${u.rol}`}>
-                            {u.rol}
-                          </span>
-                        )}
+                        <label htmlFor={`rol-${u.id}`} className="sr-only">
+                          Rol de {u.nombre} {u.apellido}
+                        </label>
+                        <select
+                          id={`rol-${u.id}`}
+                          className="admin-table__rol-select"
+                          value={u.rol}
+                          disabled={isLoading}
+                          onChange={(e) => solicitarCambioRol(u, e.target.value)}
+                          aria-label={`Cambiar rol de ${u.nombre} ${u.apellido}`}
+                        >
+                          <option value="asistente">Asistente</option>
+                          <option value="organizador">Organizador</option>
+                          <option value="admin">Administrador</option>
+                        </select>
                       </td>
                       <td data-label="Estado cuenta">
                         <span className={`admin-badge admin-badge--estado-${u.estado_cuenta}`}>
@@ -430,7 +400,7 @@ export default function GestionUsuariosPage() {
                             type="checkbox"
                             className="admin-switch__input"
                             checked={u.activo}
-                            disabled={isLoading || activeTab === 'pendientes'}
+                            disabled={isLoading}
                             onChange={() => solicitarCambioEstado(u)}
                             aria-checked={u.activo}
                           />
@@ -449,19 +419,6 @@ export default function GestionUsuariosPage() {
                           })}
                         </time>
                       </td>
-                      {activeTab === 'pendientes' && (
-                        <td data-label="Acción">
-                          <button
-                            type="button"
-                            className="btn btn-success btn-sm"
-                            disabled={isLoading}
-                            onClick={() => solicitarAprobacion(u)}
-                            aria-label={`Aprobar organizador ${u.nombre} ${u.apellido}`}
-                          >
-                            {isLoading ? 'Procesando…' : 'Aprobar'}
-                          </button>
-                        </td>
-                      )}
                     </tr>
                   );
                 })}
@@ -525,6 +482,53 @@ export default function GestionUsuariosPage() {
           onConfirm={ejecutarAccion}
           onCancel={() => setConfirmPayload(null)}
         />
+      )}
+
+      {/* Modal Crear Usuario */}
+      {showCrearUsuario && (
+        <div className="modal-overlay" role="presentation" onClick={() => setShowCrearUsuario(false)}>
+          <div className="modal-dialog" role="dialog" aria-modal="true" aria-labelledby="crear-usuario-title" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2 id="crear-usuario-title" className="modal-title">Registrar Nuevo Usuario</h2>
+            </div>
+            <form onSubmit={handleCrearUsuario}>
+              <div className="modal-body" style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+                <div>
+                  <label htmlFor="crear-nombre" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Nombre</label>
+                  <input id="crear-nombre" name="nombre" type="text" required className="admin-filters__input" style={{ width: '100%' }} />
+                </div>
+                <div>
+                  <label htmlFor="crear-apellido" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Apellido</label>
+                  <input id="crear-apellido" name="apellido" type="text" required className="admin-filters__input" style={{ width: '100%' }} />
+                </div>
+                <div>
+                  <label htmlFor="crear-correo" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Correo electrónico</label>
+                  <input id="crear-correo" name="correo" type="email" required className="admin-filters__input" style={{ width: '100%' }} />
+                </div>
+                <div>
+                  <label htmlFor="crear-contrasena" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Contraseña</label>
+                  <input id="crear-contrasena" name="contrasena" type="password" required minLength={6} className="admin-filters__input" style={{ width: '100%' }} />
+                </div>
+                <div>
+                  <label htmlFor="crear-rol" style={{ display: 'block', fontSize: '0.85rem', fontWeight: 600, marginBottom: '0.25rem' }}>Rol inicial</label>
+                  <select id="crear-rol" name="rol" className="admin-filters__select" style={{ width: '100%' }} defaultValue="organizador">
+                    <option value="asistente">Asistente</option>
+                    <option value="organizador">Organizador</option>
+                    <option value="admin">Administrador</option>
+                  </select>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={() => setShowCrearUsuario(false)}>
+                  Cancelar
+                </button>
+                <button type="submit" className="btn btn-primary">
+                  Crear Usuario
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
       )}
     </main>
   );

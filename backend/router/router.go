@@ -173,11 +173,10 @@ func Setup(app *fiber.App) {
 	adminGroup := protected.Group("/admin", middleware.RolRequerido("admin"))
 
 	// Gestión de usuarios
-	adminGroup.Get("/usuarios/pendientes", adminH.ListarPendientes)
 	adminGroup.Get("/usuarios", adminH.ListarUsuarios)
+	adminGroup.Post("/usuarios", adminH.CrearUsuario)
 	adminGroup.Patch("/usuarios/:id/rol", adminH.ActualizarRol)
 	adminGroup.Patch("/usuarios/:id/estado", adminH.ActualizarEstado)
-	adminGroup.Post("/usuarios/:id/aprobar", adminH.AprobarOrganizador)
 
 	// Auditoría
 	adminGroup.Get("/auditoria", adminH.ListarLogs)
