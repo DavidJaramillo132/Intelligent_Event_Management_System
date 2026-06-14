@@ -78,6 +78,12 @@ func Setup(app *fiber.App) {
 
 	protected := api.Use(middleware.AuthRequired())
 
+	// Perfil del usuario autenticado
+	perfil := protected.Group("/perfil")
+	perfil.Get("/", usuarioH.ObtenerPerfil)
+	perfil.Put("/", usuarioH.ActualizarPerfil)
+	perfil.Patch("/contrasena", usuarioH.CambiarContrasena)
+
 	// ── Lugares ─────────────────────────────────────────────────────────────
 	lugares := protected.Group("/lugares")
 	lugares.Get("/", lugarH.Listar)

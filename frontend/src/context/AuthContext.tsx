@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
 import { api } from '../api/client';
 
-interface User {
+export interface User {
   id: string;
   nombre: string;
   apellido: string;
@@ -27,6 +27,7 @@ interface AuthContextType {
   login: (correo: string, contrasena: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
+  updateUser: (usuario: User) => void;
   loading: boolean;
   error: string | null;
   clearError: () => void;
@@ -110,10 +111,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setToken(null);
   };
 
+  const updateUser = (usuario: User) => {
+    setUser(usuario);
+    const stored = localStorage.getItem('auth');
+    if (!stored) return;
+
+    try {
+      const auth: AuthState = JSON.parse(stored);
+      localStorage.setItem('auth', JSON.stringify({ ...auth, usuario }));
+    } catch {
+      localStorage.removeItem('auth');
+    }
+  };
+
   const clearError = () => setError(null);
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, register, logout, loading, error, clearError }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, register, logout, updateUser, loading, error, clearError }}>
       {children}
     </AuthContext.Provider>
   );

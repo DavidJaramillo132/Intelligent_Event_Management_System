@@ -11,6 +11,7 @@ import EventDiscoveryPage from './pages/attendee/EventDiscoveryPage';
 import EventDetailPage from './pages/attendee/EventDetailPage';
 import DigitalTicketPage from './pages/attendee/DigitalTicketPage';
 import SurveyPage from './pages/attendee/SurveyPage';
+import ProfilePage from './pages/profile/ProfilePage';
 import GestionUsuariosPage from './pages/admin/GestionUsuariosPage';
 import AuditoriaPage from './pages/admin/AuditoriaPage';
 import OrganizerHub from './pages/organizer/OrganizerHub';
@@ -138,6 +139,11 @@ function AppContent() {
         <Route path="/eventos/:eventoId/encuesta/:inscripcionId" element={
           <ProtectedRoute>
             <SurveyPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/perfil" element={
+          <ProtectedRoute>
+            <ProfilePage />
           </ProtectedRoute>
         } />
 

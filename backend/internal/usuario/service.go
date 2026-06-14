@@ -2,6 +2,8 @@ package usuario
 
 import (
 	"os"
+	"regexp"
+	"strings"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
@@ -14,6 +16,16 @@ import (
 
 type Service struct {
 	repo *Repository
+}
+
+type FieldError struct {
+	Status  int
+	Field   string
+	Message string
+}
+
+func (e *FieldError) Error() string {
+	return e.Message
 }
 
 func NewService(repo *Repository) *Service {
@@ -144,6 +156,103 @@ func (s *Service) Refresh(refreshToken string) (*AuthResponse, error) {
 
 // ── HELPERS ───────────────────────────────────────────────────────────────────
 
+func (s *Service) ObtenerPerfil(usuarioID string) (*UsuarioPublico, error) {
+	u, err := s.repo.BuscarPorID(usuarioID)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusNotFound, "Usuario no encontrado")
+	}
+
+	publico := toPublico(*u)
+	return &publico, nil
+}
+
+func (s *Service) ActualizarPerfil(usuarioID string, input UpdateProfileInput, ip string) (*UsuarioPublico, error) {
+	input.Nombre = strings.TrimSpace(input.Nombre)
+	input.Telefono = strings.TrimSpace(input.Telefono)
+	input.Ciudad = strings.TrimSpace(input.Ciudad)
+	input.Provincia = strings.TrimSpace(input.Provincia)
+
+	if input.Nombre == "" {
+		return nil, &FieldError{Status: fiber.StatusBadRequest, Field: "nombre", Message: "El nombre de usuario es requerido"}
+	}
+	if len(input.Nombre) > 100 {
+		return nil, &FieldError{Status: fiber.StatusBadRequest, Field: "nombre", Message: "El nombre no puede superar 100 caracteres"}
+	}
+	if input.Telefono == "" {
+		return nil, &FieldError{Status: fiber.StatusBadRequest, Field: "telefono", Message: "El telefono es requerido"}
+	}
+	if !regexp.MustCompile(`^[0-9+()\-\s]{7,30}$`).MatchString(input.Telefono) {
+		return nil, &FieldError{Status: fiber.StatusBadRequest, Field: "telefono", Message: "Ingresa un telefono valido"}
+	}
+	if input.Ciudad == "" {
+		return nil, &FieldError{Status: fiber.StatusBadRequest, Field: "ciudad", Message: "La ciudad es requerida"}
+	}
+	if len(input.Ciudad) > 100 {
+		return nil, &FieldError{Status: fiber.StatusBadRequest, Field: "ciudad", Message: "La ciudad no puede superar 100 caracteres"}
+	}
+	if input.Provincia == "" {
+		return nil, &FieldError{Status: fiber.StatusBadRequest, Field: "provincia", Message: "La provincia es requerida"}
+	}
+	if len(input.Provincia) > 100 {
+		return nil, &FieldError{Status: fiber.StatusBadRequest, Field: "provincia", Message: "La provincia no puede superar 100 caracteres"}
+	}
+
+	u, err := s.repo.BuscarPorID(usuarioID)
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusNotFound, "Usuario no encontrado")
+	}
+
+	u.Nombre = input.Nombre
+	u.Telefono = input.Telefono
+	u.Ciudad = input.Ciudad
+	u.Provincia = input.Provincia
+
+	if err := s.repo.ActualizarPerfil(u); err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error actualizando el perfil")
+	}
+
+	registrarLog(&usuarioID, u.CorreoElectronico, ip, "ACTUALIZAR_PERFIL", "Perfil actualizado")
+
+	publico := toPublico(*u)
+	return &publico, nil
+}
+
+func (s *Service) CambiarContrasena(usuarioID string, input ChangePasswordInput, ip string) error {
+	if input.ContrasenaActual == "" {
+		return &FieldError{Status: fiber.StatusBadRequest, Field: "contrasena_actual", Message: "La contrasena actual es requerida"}
+	}
+	if input.NuevaContrasena == "" {
+		return &FieldError{Status: fiber.StatusBadRequest, Field: "nueva_contrasena", Message: "La nueva contrasena es requerida"}
+	}
+	if !esContrasenaFuerte(input.NuevaContrasena) {
+		return &FieldError{Status: fiber.StatusBadRequest, Field: "nueva_contrasena", Message: "Usa al menos 8 caracteres con mayuscula, minuscula, numero y simbolo"}
+	}
+	if input.NuevaContrasena != input.ConfirmarContrasena {
+		return &FieldError{Status: fiber.StatusBadRequest, Field: "confirmar_contrasena", Message: "Las contrasenas no coinciden"}
+	}
+
+	u, err := s.repo.BuscarPorID(usuarioID)
+	if err != nil {
+		return fiber.NewError(fiber.StatusNotFound, "Usuario no encontrado")
+	}
+
+	if err := bcrypt.CompareHashAndPassword([]byte(u.ContrasenaHash), []byte(input.ContrasenaActual)); err != nil {
+		return &FieldError{Status: fiber.StatusUnauthorized, Field: "contrasena_actual", Message: "La contrasena actual es incorrecta"}
+	}
+
+	hash, err := bcrypt.GenerateFromPassword([]byte(input.NuevaContrasena), bcrypt.DefaultCost)
+	if err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Error procesando la contrasena")
+	}
+
+	if err := s.repo.ActualizarContrasena(usuarioID, string(hash)); err != nil {
+		return fiber.NewError(fiber.StatusInternalServerError, "Error actualizando la contrasena")
+	}
+
+	registrarLog(&usuarioID, u.CorreoElectronico, ip, "CAMBIO_CONTRASENA", "Contrasena actualizada")
+	return nil
+}
+
 func (s *Service) buildAuthResponse(u models.Usuario) (*AuthResponse, error) {
 	token, refreshToken, expiresIn, err := generarTokens(u)
 	if err != nil {
@@ -170,4 +279,12 @@ func toPublico(u models.Usuario) UsuarioPublico {
 		Pais:              u.Pais,
 		Telefono:          u.Telefono,
 	}
+}
+
+func esContrasenaFuerte(contrasena string) bool {
+	return len(contrasena) >= 8 &&
+		regexp.MustCompile(`[a-z]`).MatchString(contrasena) &&
+		regexp.MustCompile(`[A-Z]`).MatchString(contrasena) &&
+		regexp.MustCompile(`[0-9]`).MatchString(contrasena) &&
+		regexp.MustCompile(`[^A-Za-z0-9]`).MatchString(contrasena)
 }

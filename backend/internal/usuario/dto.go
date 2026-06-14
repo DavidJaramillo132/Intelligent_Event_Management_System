@@ -36,3 +36,16 @@ type UsuarioPublico struct {
 	Pais              string `json:"pais"`
 	Telefono          string `json:"telefono,omitempty"`
 }
+
+type UpdateProfileInput struct {
+	Nombre    string `json:"nombre"`
+	Telefono  string `json:"telefono"`
+	Ciudad    string `json:"ciudad"`
+	Provincia string `json:"provincia"`
+}
+
+type ChangePasswordInput struct {
+	ContrasenaActual    string `json:"contrasena_actual"`
+	NuevaContrasena     string `json:"nueva_contrasena"`
+	ConfirmarContrasena string `json:"confirmar_contrasena"`
+}

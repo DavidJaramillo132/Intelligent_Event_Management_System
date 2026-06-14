@@ -63,12 +63,30 @@
   text-decoration: none;
 }
 
+.header__user-menu {
+  position: relative;
+}
+
 .header__user {
   display: flex;
   align-items: center;
   gap: var(--space-2);
   font-size: var(--font-size-sm);
   color: var(--color-text-secondary);
+  min-height: 2.5rem;
+  padding: var(--space-1) var(--space-2);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  cursor: pointer;
+  font-family: var(--font-family);
+}
+
+.header__user:hover,
+.header__user[aria-expanded="true"] {
+  color: var(--color-primary);
+  background: var(--color-primary-surface);
+  border-color: var(--color-primary-border);
 }
 
 .header__avatar {
@@ -88,6 +106,61 @@
   font-weight: 500;
 }
 
+.header__chevron {
+  font-size: var(--font-size-xs);
+  line-height: 1;
+}
+
+.header__dropdown {
+  position: absolute;
+  top: calc(100% + var(--space-2));
+  right: 0;
+  z-index: var(--z-dropdown);
+  width: 13rem;
+  padding: var(--space-2);
+  background: var(--color-surface-raised);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
+}
+
+.header__dropdown-item {
+  width: 100%;
+  min-height: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid transparent;
+  border-radius: var(--radius-md);
+  background: transparent;
+  color: var(--color-text);
+  cursor: pointer;
+  font-family: var(--font-family);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-align: left;
+}
+
+.header__dropdown-item:hover,
+.header__dropdown-item:focus-visible {
+  color: var(--color-primary);
+  background: var(--color-primary-surface);
+}
+
+.header__menu-icon {
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-grid;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 700;
+}
+
 @media (max-width: 640px) {
   .header__user-name {
     display: none;
@@ -95,5 +168,10 @@
   
   .header__nav {
     gap: var(--space-2);
+  }
+
+  .header__dropdown {
+    right: 0;
+    width: min(13rem, calc(100vw - 2rem));
   }
 }

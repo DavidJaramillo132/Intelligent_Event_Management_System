@@ -10,6 +10,20 @@ interface ApiResponse<T = unknown> {
   ok: boolean;
   data?: T;
   message?: string;
+  error?: string;
+  field?: string;
+}
+
+export class ApiError extends Error {
+  field?: string;
+  status: number;
+
+  constructor(message: string, status: number, field?: string) {
+    super(message);
+    this.name = 'ApiError';
+    this.status = status;
+    this.field = field;
+  }
 }
 
 function getToken(): string | null {
@@ -50,7 +64,7 @@ export async function apiRequest<T = unknown>(
   const data = await response.json();
 
   if (!response.ok) {
-    throw new Error(data.message || `Error ${response.status}`);
+    throw new ApiError(data.message || data.error || `Error ${response.status}`, response.status, data.field);
   }
 
   return data;
