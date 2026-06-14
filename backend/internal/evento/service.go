@@ -223,3 +223,25 @@ func toResponse(e models.Evento) *EventoResponse {
 
 	return resp
 }
+
+// StatsEvento reúne métricas de check-ins e inscripciones para un evento
+func (s *Service) StatsEvento(eventoID string) map[string]interface{} {
+	checkins := s.repo.ContarCheckins(eventoID)
+	inscripciones := s.repo.ContarInscripciones(eventoID)
+	e, _ := s.repo.BuscarPorID(eventoID)
+	var capacidad int64
+	var pct float64
+	if e != nil {
+		capacidad = int64(e.Capacidad)
+		if capacidad > 0 {
+			raw := float64(checkins) / float64(capacidad) * 100
+			pct = float64(int(raw*10)) / 10
+		}
+	}
+	return map[string]interface{}{
+		"checkins":      checkins,
+		"inscripciones": inscripciones,
+		"capacidad":     capacidad,
+		"pct_ocupacion": pct,
+	}
+}

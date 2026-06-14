@@ -13,6 +13,10 @@ import DigitalTicketPage from './pages/attendee/DigitalTicketPage';
 import SurveyPage from './pages/attendee/SurveyPage';
 import GestionUsuariosPage from './pages/admin/GestionUsuariosPage';
 import AuditoriaPage from './pages/admin/AuditoriaPage';
+import OrganizerHub from './pages/organizer/OrganizerHub';
+import CheckinPage from './pages/organizer/CheckinPage';
+import MonitorPage from './pages/organizer/MonitorPage';
+import ReportPage from './pages/organizer/ReportPage';
 import './App.css';
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
@@ -42,9 +46,14 @@ function HomePage() {
               {isAuthenticated ? (
                 <>
                   {(user?.rol === 'organizador' || user?.rol === 'admin') && (
-                    <a href="/eventos/crear" className="btn btn-primary btn-lg" id="hero-create-event">
-                      🚀 Crear un Evento
-                    </a>
+                    <>
+                      <a href="/organizador" className="btn btn-primary btn-lg" id="hero-org-hub">
+                        🎪 Mi Panel Organizador
+                      </a>
+                      <a href="/eventos/crear" className="btn btn-secondary btn-lg" id="hero-create-event">
+                        🚀 Crear un Evento
+                      </a>
+                    </>
                   )}
                   <a href="/eventos" className="btn btn-secondary btn-lg" id="hero-explore">
                     🔍 Explorar Eventos
@@ -133,6 +142,26 @@ function AppContent() {
         } />
 
         {/* ── Módulo ORGANIZADOR ───────────────────────────────── */}
+        <Route path="/organizador" element={
+          <ProtectedRoute roles={['organizador', 'admin']}>
+            <OrganizerHub />
+          </ProtectedRoute>
+        } />
+        <Route path="/organizador/eventos/:eventoId/checkin" element={
+          <ProtectedRoute roles={['organizador', 'admin']}>
+            <CheckinPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/organizador/eventos/:eventoId/monitor" element={
+          <ProtectedRoute roles={['organizador', 'admin']}>
+            <MonitorPage />
+          </ProtectedRoute>
+        } />
+        <Route path="/organizador/eventos/:eventoId/reporte" element={
+          <ProtectedRoute roles={['organizador', 'admin']}>
+            <ReportPage />
+          </ProtectedRoute>
+        } />
         <Route path="/eventos/crear" element={
           <ProtectedRoute roles={['organizador', 'admin']}>
             <CreateEventPage />

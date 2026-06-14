@@ -26,9 +26,14 @@ export default function Header() {
           {isAuthenticated ? (
             <>
               {(user?.rol === 'organizador' || user?.rol === 'admin') && (
-                <Link to="/eventos/crear" className="header__link" id="nav-create-event">
-                  Crear Evento
-                </Link>
+                <>
+                  <Link to="/organizador" className="header__link" id="nav-organizer-hub">
+                    🎪 Mi Panel
+                  </Link>
+                  <Link to="/eventos/crear" className="header__link" id="nav-create-event">
+                    ➕ Crear Evento
+                  </Link>
+                </>
               )}
               {user?.rol === 'admin' && (
                 <>

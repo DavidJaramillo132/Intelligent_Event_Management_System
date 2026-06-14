@@ -119,3 +119,21 @@ func (r *Repository) Actualizar(e *models.Evento) error {
 func (r *Repository) Eliminar(id string) error {
 	return db.GetDB().Delete(&models.Evento{}, "id = ?", id).Error
 }
+
+// ContarCheckins retorna el número de check-ins registrados para un evento
+func (r *Repository) ContarCheckins(eventoID string) int64 {
+	var count int64
+	db.GetDB().Model(&models.RegistroCheckin{}).
+		Where("evento_id = ?", eventoID).
+		Count(&count)
+	return count
+}
+
+// ContarInscripciones retorna el número de inscripciones para un evento
+func (r *Repository) ContarInscripciones(eventoID string) int64 {
+	var count int64
+	db.GetDB().Model(&models.Inscripcion{}).
+		Where("evento_id = ? AND estado != 'cancelado'", eventoID).
+		Count(&count)
+	return count
+}

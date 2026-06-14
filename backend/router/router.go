@@ -9,6 +9,7 @@ import (
 	"main.go/internal/encuesta"
 	"main.go/internal/evento"
 	"main.go/internal/ia"
+	"main.go/internal/incidencia"
 	"main.go/internal/inscripcion"
 	"main.go/internal/lugar"
 	"main.go/internal/sesion_evento"
@@ -45,6 +46,7 @@ func Setup(app *fiber.App) {
 	uploadH := upload.NewHandler()
 	tipoEntradaH := tipo_entrada.NewHandler()
 	sesionEventoH := sesion_evento.NewHandler()
+	incidenciaH := incidencia.NewHandler()
 
 	// ── Prefijo base ────────────────────────────────────────────────────────
 	api := app.Group("/api/v1")
@@ -94,6 +96,7 @@ func Setup(app *fiber.App) {
 	// ── Eventos (protegidos: crear/editar/borrar) ─────────────────────────────
 	eventos := protected.Group("/eventos")
 	eventos.Get("/organizador/:organizadorId", eventoH.ListarPorOrganizador)
+	eventos.Get("/:id/stats", eventoH.Stats)
 	eventos.Post("/", middleware.RolRequerido("organizador", "admin"), eventoH.Crear)
 	eventos.Put("/:id", middleware.RolRequerido("organizador", "admin"), eventoH.Actualizar)
 	eventos.Delete("/:id", middleware.RolRequerido("organizador", "admin"), eventoH.Eliminar)
@@ -127,6 +130,11 @@ func Setup(app *fiber.App) {
 	materiales.Get("/evento/:eventoId", checkinH.ListarMaterialesPorEvento)
 	materiales.Put("/:id", middleware.RolRequerido("organizador", "admin"), checkinH.ActualizarMaterial)
 	materiales.Delete("/:id", middleware.RolRequerido("organizador", "admin"), checkinH.EliminarMaterial)
+
+	// ── Incidencias de Evento ────────────────────────────────────────────────
+	incidencias := protected.Group("/incidencias")
+	incidencias.Post("/", middleware.RolRequerido("organizador", "admin"), incidenciaH.Crear)
+	incidencias.Get("/evento/:eventoId", middleware.RolRequerido("organizador", "admin"), incidenciaH.ListarPorEvento)
 
 	// ── Check-ins ───────────────────────────────────────────────────────────
 	checkins := protected.Group("/checkins")

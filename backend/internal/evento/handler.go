@@ -135,3 +135,15 @@ func (h *Handler) Eliminar(c *fiber.Ctx) error {
 		"message": "Evento eliminado correctamente",
 	})
 }
+
+// GET /api/v1/eventos/:id/stats
+func (h *Handler) Stats(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	stats := h.service.StatsEvento(id)
+
+	return c.JSON(fiber.Map{
+		"ok":   true,
+		"data": stats,
+	})
+}
