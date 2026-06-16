@@ -4,6 +4,13 @@ import { apiRequest } from '../../api/client';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import AlertMessage from '../../components/ui/AlertMessage';
 import './attendee.css';
+import evCyber from '../../assets/ev-cyber.jpg';
+import evFeria from '../../assets/ev-feria.jpg';
+import evHackathon from '../../assets/ev-hackathon.jpg';
+import evNetworkingWom from '../../assets/ev-networking-women.jpg';
+import evSinfonica from '../../assets/ev-sinfonica.jpg';
+import evTechconf from '../../assets/ev-techconf.jpg';
+import evUx from '../../assets/ev-ux.jpg';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
 
@@ -24,6 +31,20 @@ interface Evento {
   accesibilidad_fisica: boolean;
   accesibilidad_sensorial: boolean;
 }
+
+const getEventImage = (title: string) => {
+  const t = title.toLowerCase();
+  
+  if (t.includes('techconf') || t.includes('tecnología') || t.includes('conferencia')) return evTechconf;
+  if (t.includes('hackquito') || t.includes('hackathon') || t.includes('programación')) return evHackathon;
+  if (t.includes('ux') || t.includes('diseño') || t.includes('taller')) return evUx;
+  if (t.includes('sinfónica') || t.includes('orquesta') || t.includes('música')) return evSinfonica;
+  if (t.includes('cyber') || t.includes('seguridad') || t.includes('ia')) return evCyber;
+  if (t.includes('feria') || t.includes('exposición')) return evFeria;
+  if (t.includes('women') || t.includes('networking') || t.includes('mujeres')) return evNetworkingWom;
+  
+  return evTechconf; // Respaldo
+};
 
 interface TipoEvento {
   id: number;
@@ -82,7 +103,7 @@ function activeFilterCount(f: Filters): number {
   return n;
 }
 
-/* ── EventCard ─────────────────────────────────────────────────────────── */
+/* ── EventCard — REDISEÑO PREMIUM CORREGIDO ESTILO LOVABLE ──────────────── */
 
 function EventCard({ evento }: { evento: Evento }) {
   const navigate = useNavigate();
@@ -100,91 +121,104 @@ function EventCard({ evento }: { evento: Evento }) {
     evento.capacidad <= 5 ? `¡Solo ${evento.capacidad} cupos!` :
     `${evento.capacidad} cupos`;
 
-  const cuposClass =
-    evento.capacidad === 0 ? 'event-card__slots--full' :
-    evento.capacidad <= 5 ? 'event-card__slots--low' : '';
-
   return (
     <article
-      className="event-card animate-fade-in"
+      className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-card p-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5 cursor-pointer h-full"
       role="button"
       tabIndex={0}
       aria-label={`Ver detalles del evento: ${evento.titulo}`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
     >
-      {/* Image */}
-      <div className="event-card__image-wrap">
-        {evento.imagen_portada ? (
-          <img
-            src={evento.imagen_portada}
-            alt={`Imagen del evento ${evento.titulo}`}
-            className="event-card__image"
-            loading="lazy"
-          />
-        ) : (
-          <div className="event-card__image-placeholder" aria-hidden="true">🎪</div>
-        )}
-
-        {/* Badges */}
-        <div className="event-card__badges" aria-label="Características del evento">
+      {/* 1. Contenedor de la Imagen con Difuminado Inferior Estilo Lovable */}
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-muted">
+        <img
+          src={evento.imagen_portada || getEventImage(evento.titulo)}
+          alt={`Imagen del evento ${evento.titulo}`}
+          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
+        />
+        {/* Capa de degradado inferior para fusionar la foto con el fondo de la tarjeta */}
+        <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent opacity-90" />
+        
+        {/* Etiquetas flotantes sobre la imagen */}
+        <div className="absolute top-4 left-4 flex flex-wrap gap-2 max-w-[calc(100%-2rem)]">
           {evento.tipo_evento_nombre && (
-            <span className="badge badge--category">
+            <span className="inline-block rounded-full bg-indigo-600/90 px-3 py-1 text-xs font-semibold text-white shadow-sm backdrop-blur-sm">
               {evento.tipo_evento_nombre}
             </span>
           )}
           {evento.costo === 0 && (
-            <span className="badge badge--free">Gratis</span>
-          )}
-          {evento.accesibilidad_fisica && (
-            <span
-              className="badge badge--accessible-physical"
-              aria-label="Accesibilidad física disponible"
-              title="Lugar con accesibilidad física"
-            >
-              ♿
+            <span className="inline-block rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white shadow-sm">
+              Gratis
             </span>
+          )}
+        </div>
+
+        {/* Iconos Flotantes de Accesibilidad con un look moderno y limpio */}
+        <div className="absolute bottom-4 right-4 flex gap-1.5 bg-background/60 backdrop-blur-md p-1.5 rounded-xl shadow-sm">
+          {evento.accesibilidad_fisica && (
+            <span className="text-sm" aria-label="Accesibilidad física disponible" title="Lugar con accesibilidad física">♿</span>
           )}
           {evento.accesibilidad_sensorial && (
-            <span
-              className="badge badge--accessible-sensory"
-              aria-label="Accesibilidad sensorial disponible"
-              title="Lugar con accesibilidad sensorial"
-            >
-              👂
-            </span>
+            <span className="text-sm" aria-label="Accesibilidad sensorial disponible" title="Lugar con accesibilidad sensorial">👂</span>
           )}
         </div>
       </div>
 
-      {/* Body */}
-      <div className="event-card__body">
-        <h2 className="event-card__title">{evento.titulo}</h2>
+      {/* 2. Cuerpo Interno de la Tarjeta (Información del Evento) */}
+      <div className="flex flex-1 flex-col p-6">
+        <h2 className="text-xl font-bold tracking-tight text-foreground line-clamp-1 group-hover:text-[oklch(0.52_0.25_285)] dark:group-hover:text-indigo-400 transition-colors">
+          {evento.titulo}
+        </h2>
+        
         {evento.descripcion && (
-          <p className="event-card__desc">{evento.descripcion}</p>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground line-clamp-2">
+            {evento.descripcion}
+          </p>
         )}
-        <div className="event-card__meta">
-          <div className="event-card__meta-row">
-            <span className="event-card__meta-icon" aria-hidden="true">📅</span>
-            <span>{formatDate(evento.inicio)}</span>
+
+        {/* Metadatos con Iconos Emoji Limpios alineados a la izquierda */}
+        <div className="mt-4 space-y-2.5 text-sm text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <span className="text-base shrink-0" aria-hidden="true">📅</span>
+            <span className="capitalize">{formatDate(evento.inicio)}</span>
           </div>
           {evento.lugar_nombre && (
-            <div className="event-card__meta-row">
-              <span className="event-card__meta-icon" aria-hidden="true">📍</span>
-              <span>{evento.lugar_nombre}{evento.lugar_ciudad ? `, ${evento.lugar_ciudad}` : ''}</span>
+            <div className="flex items-center gap-2">
+              <span className="text-base shrink-0" aria-hidden="true">📍</span>
+              <span className="truncate">{evento.lugar_nombre}{evento.lugar_ciudad ? `, ${evento.lugar_ciudad}` : ''}</span>
             </div>
           )}
         </div>
-      </div>
 
-      {/* Footer */}
-      <div className="event-card__footer">
-        <span className={`event-card__price ${evento.costo === 0 ? 'event-card__price--free' : ''}`}>
-          {evento.costo === 0 ? 'Gratis' : `$${evento.costo.toFixed(2)}`}
-        </span>
-        <span className={`event-card__slots ${cuposClass}`} aria-label={`${cuposLabel} disponibles`}>
-          👥 {cuposLabel}
-        </span>
+        {/* Contenedor Inferior: Costos y Capacidad de Cupos */}
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-border/40">
+          <div>
+            {evento.costo > 0 ? (
+              <span className="text-2xl font-black text-slate-900 dark:text-white">
+                ${evento.costo.toFixed(2)}
+              </span>
+            ) : (
+              <span className="text-2xl font-black text-emerald-500">
+                Gratis
+              </span>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-muted-foreground bg-muted/50 px-2.5 py-1 rounded-lg">
+            <span>👥 {cuposLabel}</span>
+          </div>
+        </div>
+
+        {/* 3. Botón de Acción Completo Azul Interactivo Extraído de Lovable */}
+        <div className="mt-5">
+          <button
+            type="button"
+            className="w-full inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-95 hover:scale-[1.01] active:scale-[0.99]"
+          >
+            Ver detalles
+          </button>
+        </div>
       </div>
     </article>
   );
@@ -193,6 +227,9 @@ function EventCard({ evento }: { evento: Evento }) {
 /* ── Main Component ─────────────────────────────────────────────────────── */
 
 export default function EventDiscoveryPage() {
+  useEffect(() => {
+    document.title = "Explorar Catálogo de Eventos | EventosPro";
+  }, []);
   const [eventos, setEventos] = useState<Evento[]>([]);
   const [tiposEvento, setTiposEvento] = useState<TipoEvento[]>([]);
   const [loading, setLoading] = useState(true);
@@ -490,13 +527,14 @@ export default function EventDiscoveryPage() {
           {loading ? (
             <LoadingSpinner message="Buscando eventos..." />
           ) : (
+            /* Ajustamos la grilla para que use flexbox/grid moderno compatible con las nuevas tarjetas rounded-3xl */
             <div
-              className="events-grid"
+              className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3"
               role="list"
               aria-label="Lista de eventos disponibles"
             >
               {eventos.length === 0 ? (
-                <div className="events-empty" role="status">
+                <div className="col-span-full events-empty" role="status">
                   <span className="events-empty__icon" aria-hidden="true">🔍</span>
                   <h2 className="events-empty__title">Sin resultados</h2>
                   <p className="events-empty__desc">
@@ -508,7 +546,7 @@ export default function EventDiscoveryPage() {
                 </div>
               ) : (
                 eventos.map(ev => (
-                  <div key={ev.id} role="listitem">
+                  <div key={ev.id} role="listitem" className="h-full">
                     <EventCard evento={ev} />
                   </div>
                 ))

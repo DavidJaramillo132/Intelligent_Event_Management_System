@@ -1,4 +1,5 @@
-import { useState, type FormEvent } from 'react';
+import { useState, useEffect } from 'react';
+import type { FormEvent } from 'react'; // <-- ¡Aquí le especificamos que es un tipo de TypeScript!
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import FormField from '../../components/ui/FormField';
@@ -7,6 +8,9 @@ import { validateEmail, validatePassword } from '../../utils/validators';
 import './auth.css';
 
 export default function LoginPage() {
+  useEffect(() => {
+    document.title = "Iniciar Sesión | EventosPro";
+  }, []);
   const { login, loading, error, clearError } = useAuth();
   const navigate = useNavigate();
   const [success, setSuccess] = useState(false);

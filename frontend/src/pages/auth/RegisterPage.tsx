@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useState, type FormEvent,  useEffect} from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import FormField from '../../components/ui/FormField';
@@ -7,6 +7,9 @@ import { validateEmail, validatePassword, validateRequired, validatePasswordMatc
 import './auth.css';
 
 export default function RegisterPage() {
+  useEffect(() => {
+    document.title = "Crear Cuenta | EventosPro";
+  }, []);
   const { register, loading, error, clearError } = useAuth();
   const navigate = useNavigate();
   const [success, setSuccess] = useState(false);

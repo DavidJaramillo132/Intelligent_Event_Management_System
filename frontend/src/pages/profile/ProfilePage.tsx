@@ -36,6 +36,9 @@ function getErrorMessage(error: unknown, fallback: string) {
 }
 
 export default function ProfilePage() {
+  useEffect(() => {
+    document.title = "Mi Perfil de Usuario | EventosPro";
+  }, []);
   const { updateUser } = useAuth();
   const [user, setUser] = useState<UserProfile | null>(null);
   
