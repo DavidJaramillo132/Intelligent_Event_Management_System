@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { ApiError } from '../../api/client';
 import { profileApi, type UserProfile } from '../../api/profileApi';
 import FormField from '../../components/ui/FormField';
+import ConfirmModal from '../../components/ui/ConfirmModal';
 import './ProfilePage.css';
 
 type ProfileForm = {
@@ -59,6 +60,12 @@ export default function ProfilePage() {
   const [savingProfile, setSavingProfile] = useState(false);
   const [savingPassword, setSavingPassword] = useState(false);
   const [loading, setLoading] = useState(true);
+
+  // Estados para modales de confirmación (WCAG 3.3.4)
+  const [showProfileConfirm, setShowProfileConfirm] = useState(false);
+  const [showPasswordConfirm, setShowPasswordConfirm] = useState(false);
+  const [pendingProfileData, setPendingProfileData] = useState<ProfileForm | null>(null);
+  const [pendingPasswordData, setPendingPasswordData] = useState<PasswordForm | null>(null);
 
   useEffect(() => {
     // Fetch the latest profile data
@@ -118,16 +125,25 @@ export default function ProfilePage() {
       return;
     }
 
+    // WCAG 3.3.4: Mostrar confirmación antes de enviar
+    setPendingProfileData(profileForm);
+    setShowProfileConfirm(true);
+  };
+
+  const confirmProfileUpdate = async () => {
+    if (!pendingProfileData) return;
+    
+    setShowProfileConfirm(false);
     setSavingProfile(true);
     setProfileErrors({});
     setProfileStatus('');
 
     try {
       const response = await profileApi.actualizarPerfil({
-        nombre: profileForm.nombre.trim(),
-        telefono: profileForm.telefono.trim(),
-        ciudad: profileForm.ciudad.trim(),
-        provincia: profileForm.provincia.trim(),
+        nombre: pendingProfileData.nombre.trim(),
+        telefono: pendingProfileData.telefono.trim(),
+        ciudad: pendingProfileData.ciudad.trim(),
+        provincia: pendingProfileData.provincia.trim(),
       });
       if (response.data) {
         setUser(response.data);
@@ -142,6 +158,7 @@ export default function ProfilePage() {
       }
     } finally {
       setSavingProfile(false);
+      setPendingProfileData(null);
     }
   };
 
@@ -162,12 +179,21 @@ export default function ProfilePage() {
       return;
     }
 
+    // WCAG 3.3.4: Mostrar confirmación antes de cambiar contraseña
+    setPendingPasswordData(passwordForm);
+    setShowPasswordConfirm(true);
+  };
+
+  const confirmPasswordUpdate = async () => {
+    if (!pendingPasswordData) return;
+    
+    setShowPasswordConfirm(false);
     setSavingPassword(true);
     setPasswordErrors({});
     setPasswordStatus('');
 
     try {
-      await profileApi.cambiarContrasena(passwordForm);
+      await profileApi.cambiarContrasena(pendingPasswordData);
       setPasswordForm(emptyPasswordForm);
       setPasswordStatus('Tu contraseña ha sido cambiada exitosamente.');
     } catch (error) {
@@ -178,6 +204,7 @@ export default function ProfilePage() {
       }
     } finally {
       setSavingPassword(false);
+      setPendingPasswordData(null);
     }
   };
 
@@ -321,9 +348,19 @@ export default function ProfilePage() {
                 error={passwordErrors.nueva_contrasena}
               />
 
-              <ul className="password-rules" aria-live="polite" aria-label="Validación de fuerza de contraseña">
+              <ul 
+                className="password-rules" 
+                role="status"
+                aria-live="polite"
+                aria-atomic="true"
+                aria-label="Validación de requisitos de contraseña"
+              >
                 {passwordChecks.map((check) => (
-                  <li key={check.id} className={check.ok ? 'password-rule password-rule--ok' : 'password-rule'}>
+                  <li 
+                    key={check.id} 
+                    className={check.ok ? 'password-rule password-rule--ok' : 'password-rule'}
+                    aria-label={`${check.label}: ${check.ok ? 'Cumplido' : 'Pendiente'}`}
+                  >
                     <span className="password-rule__icon" aria-hidden="true">{check.ok ? '✓' : '×'}</span>
                     {check.label}
                   </li>
@@ -351,6 +388,35 @@ export default function ProfilePage() {
         </div>
 
       </div>
+
+      {/* Modales de confirmación WCAG 3.3.4 */}
+      <ConfirmModal
+        isOpen={showProfileConfirm}
+        title="Confirmar actualización de perfil"
+        message="¿Estás seguro de que deseas actualizar tu información personal? Estos cambios se aplicarán de inmediato."
+        confirmText="Sí, actualizar"
+        cancelText="Cancelar"
+        onConfirm={confirmProfileUpdate}
+        onCancel={() => {
+          setShowProfileConfirm(false);
+          setPendingProfileData(null);
+        }}
+        variant="info"
+      />
+
+      <ConfirmModal
+        isOpen={showPasswordConfirm}
+        title="Confirmar cambio de contraseña"
+        message="¿Estás seguro de que deseas cambiar tu contraseña? Deberás usar la nueva contraseña para iniciar sesión en el futuro."
+        confirmText="Sí, cambiar contraseña"
+        cancelText="Cancelar"
+        onConfirm={confirmPasswordUpdate}
+        onCancel={() => {
+          setShowPasswordConfirm(false);
+          setPendingPasswordData(null);
+        }}
+        variant="warning"
+      />
     </main>
   );
 }

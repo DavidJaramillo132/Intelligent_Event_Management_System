@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiRequest } from '../../api/client';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import AlertMessage from '../../components/ui/AlertMessage';
+import { detectLanguage } from '../../utils/language';
 import './attendee.css';
 import evCyber from '../../assets/ev-cyber.jpg';
 import evFeria from '../../assets/ev-feria.jpg';
@@ -123,10 +124,10 @@ function EventCard({ evento }: { evento: Evento }) {
 
   return (
     <article
-      className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-card p-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5 cursor-pointer h-full"
+      className="group flex flex-col overflow-hidden rounded-3xl border border-border bg-card p-0 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-indigo-500/5 cursor-pointer h-full scroll-mt-20"
       role="button"
       tabIndex={0}
-      aria-label={`Ver detalles del evento: ${evento.titulo}`}
+      aria-labelledby={`event-title-${evento.id} event-action-${evento.id}`}
       onClick={handleClick}
       onKeyDown={handleKeyDown}
     >
@@ -168,7 +169,11 @@ function EventCard({ evento }: { evento: Evento }) {
 
       {/* 2. Cuerpo Interno de la Tarjeta (Información del Evento) */}
       <div className="flex flex-1 flex-col p-6">
-        <h2 className="text-xl font-bold tracking-tight text-foreground line-clamp-1 group-hover:text-[oklch(0.52_0.25_285)] dark:group-hover:text-indigo-400 transition-colors">
+        <h2 
+          id={`event-title-${evento.id}`}
+          className="text-xl font-bold tracking-tight text-foreground line-clamp-1 group-hover:text-[oklch(0.52_0.25_285)] dark:group-hover:text-indigo-400 transition-colors"
+          lang={detectLanguage(evento.titulo)}
+        >
           {evento.titulo}
         </h2>
         
@@ -213,6 +218,7 @@ function EventCard({ evento }: { evento: Evento }) {
         {/* 3. Botón de Acción Completo Azul Interactivo Extraído de Lovable */}
         <div className="mt-5">
           <button
+            id={`event-action-${evento.id}`}
             type="button"
             className="w-full inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:opacity-95 hover:scale-[1.01] active:scale-[0.99]"
           >
@@ -336,7 +342,7 @@ export default function EventDiscoveryPage() {
                 id="search-input"
                 ref={searchInputRef}
                 type="search"
-                className="search-bar__input"
+                className="search-bar__input bg-white text-gray-900 focus:text-gray-900 dark:bg-white dark:text-gray-900 font-medium placeholder-gray-500"
                 placeholder="Buscar eventos..."
                 value={pendingFilters.q}
                 onChange={handleSearchChange}

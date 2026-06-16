@@ -1,18 +1,18 @@
 export function validateEmail(email: string): string | null {
   if (!email.trim()) return 'El correo electrónico es requerido';
   const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!re.test(email)) return 'Ingrese un correo electrónico válido';
+  if (!re.test(email)) return 'El correo electrónico debe incluir un símbolo "@" seguido de un dominio válido (ej: usuario@ejemplo.com)';
   return null;
 }
 
 export function validatePassword(password: string): string | null {
   if (!password) return 'La contraseña es requerida';
-  if (password.length < 6) return 'La contraseña debe tener al menos 6 caracteres';
+  if (password.length < 6) return 'La contraseña debe tener al menos 6 caracteres. Ingresa una contraseña más larga.';
   return null;
 }
 
 export function validateRequired(value: string, fieldName: string): string | null {
-  if (!value.trim()) return `${fieldName} es requerido`;
+  if (!value.trim()) return `${fieldName} es requerido. Por favor, completa este campo antes de continuar.`;
   return null;
 }
 
@@ -29,7 +29,7 @@ export function validateNumber(value: string, fieldName: string, min?: number): 
 }
 
 export function validatePasswordMatch(password: string, confirm: string): string | null {
-  if (password !== confirm) return 'Las contraseñas no coinciden';
+  if (password !== confirm) return 'Las contraseñas no coinciden. Asegúrate de escribir la misma contraseña en ambos campos.';
   return null;
 }
 

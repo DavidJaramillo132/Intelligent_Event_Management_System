@@ -295,6 +295,16 @@
   :focus:not(:focus-visible) {
     outline: none;
   }
+
+  /* WCAG 2.4.11: Prevenir que el foco quede oculto por el header sticky */
+  :focus {
+    scroll-margin-top: 80px;
+  }
+
+  /* Para navegación con anclas (enlaces internos) */
+  :target {
+    scroll-margin-top: 80px;
+  }
 }
 
 /* ═══════════════════════════════════════════════════════════════════════════
@@ -316,17 +326,19 @@
     transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
   }
 
+  /* WCAG 2.4.7: Foco visible mejorado con respaldo de outline */
   input:focus, select:focus, textarea:focus {
     border-color: var(--color-primary);
-    box-shadow: var(--shadow-glow);
-    outline: none;
+    box-shadow: 0 0 0 3px rgba(108, 58, 237, 0.5);
+    outline: 2px solid var(--color-primary);
+    outline-offset: 2px;
   }
 
-  /* Selectors y Radios Customizados con Contraste ≥ 3:1 */
+  /* WCAG 2.5.8: Selectors y Radios con tamaño mínimo 24x24px */
   input[type="radio"], input[type="checkbox"] {
     appearance: none;
-    width: 1.25rem;
-    height: 1.25rem;
+    width: 1.5rem;
+    height: 1.5rem;
     border: 2px solid var(--color-border-strong);
     background-color: var(--color-surface);
     cursor: pointer;

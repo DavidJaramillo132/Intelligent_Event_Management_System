@@ -158,14 +158,14 @@ export default function Header() {
                 aria-haspopup="true"
                 aria-expanded={isMenuOpen}
                 aria-controls="user-menu"
-                aria-label={`Abrir menu de usuario de ${userName}`}
+                aria-labelledby="user-menu-trigger-label"
                 onClick={() => setIsMenuOpen((current) => !current)}
                 onKeyDown={handleUserButtonKeyDown}
               >
                 <span className="grid h-7 w-7 place-items-center rounded-lg bg-indigo-50 dark:bg-indigo-950 text-xs font-semibold text-indigo-600 dark:text-indigo-400" aria-hidden="true">
                   {userInitial}
                 </span>
-                <span className="text-xs font-medium max-w-[120px] truncate">{userName}</span>
+                <span id="user-menu-trigger-label" className="text-xs font-medium max-w-[120px] truncate">{userName}</span>
                 <ChevronDown className="h-3.5 w-3.5 text-muted-foreground" aria-hidden="true" />
               </button>
 
