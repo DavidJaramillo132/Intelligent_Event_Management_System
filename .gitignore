@@ -5,6 +5,10 @@
 .env.*.secret
 *.env
 
+# DOCs
+*.pdf
+*PLAN_DESARROLLO_WCAG22.md
+
 # Docker volumes and data
 docker/postgres_data/
 docker/pgadmin_data/

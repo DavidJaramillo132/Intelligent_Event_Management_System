@@ -309,6 +309,54 @@ function HomePage() {
           </div>
         </section>
 
+        {/* ── SECCIÓN VIDEO DESTACADO ────────────────────────────────────────────────── */}
+        <section className="border-t border-border/60 bg-background py-24 transition-colors duration-200">
+          <div className="mx-auto max-w-5xl px-6">
+            <div className="mb-12 max-w-2xl">
+              <p className="text-sm font-medium uppercase tracking-wider text-[oklch(0.52_0.25_285)] dark:text-indigo-400">
+                Video destacado
+              </p>
+              <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
+                Vive la experiencia
+              </h2>
+              <p className="mt-3 text-base leading-relaxed text-muted-foreground">
+                Mira cómo se vivió nuestro último evento corporativo. Organiza el tuyo con EventosPro.
+              </p>
+            </div>
+
+            <div className="relative aspect-video overflow-hidden rounded-2xl shadow-xl">
+              <iframe
+                src="https://www.youtube.com/embed/OWWJPNIX0V0"
+                title="Video corporativo - 25 Aniversario GTT (Alicante) - Ejemplo de evento gestionado con EventosPro"
+                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="absolute inset-0 h-full w-full"
+              />
+            </div>
+
+            <details className="mt-6 rounded-xl border border-border bg-muted/20 p-4">
+              <summary className="cursor-pointer font-medium text-foreground">
+                📄 Transcripción y descripción del video
+              </summary>
+              <div className="mt-3 space-y-2 text-sm text-muted-foreground">
+                <p>El video muestra el evento del 25 aniversario de GTT en Alicante: recepción de asistentes, keynote principal, sesiones de networking y cierre del evento. La información visual (escenario, asistentes, logotipos) es decorativa y no añade contenido adicional al audio principal.</p>
+                <p className="text-xs">
+                  No se requiere audiodescripción adicional. Subtítulos disponibles en el reproductor de YouTube (botón CC). También puedes{' '}
+                  <a
+                    href="https://www.youtube.com/watch?v=OWWJPNIX0V0"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline"
+                    aria-label="Ver en YouTube (se abre en nueva ventana)"
+                  >
+                    verlo directamente en YouTube ↗
+                  </a>
+                </p>
+              </div>
+            </details>
+          </div>
+        </section>
+
         {/* ── ESCAPARATE DE PRÓXIMOS EVENTOS (TARJETAS CONECTADAS REALES) ───────────────────────────── */}
         <section id="eventos" className="border-t border-border/60 bg-muted/40 py-24 transition-colors duration-200">
           <div className="mx-auto max-w-7xl px-6">
