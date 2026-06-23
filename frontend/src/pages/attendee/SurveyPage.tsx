@@ -4,6 +4,7 @@ import { useAuth } from '../../context/AuthContext';
 import { api } from '../../api/client';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import AlertMessage from '../../components/ui/AlertMessage';
+import AccessibleTooltip from '../../components/ui/AccessibleTooltip';
 import './attendee.css';
 
 /* ── Types ─────────────────────────────────────────────────────────────── */
@@ -118,13 +119,14 @@ function LikertScale({
             onChange={() => onChange(opt.v)}
             aria-label={`${opt.label} — ${opt.desc}`}
           />
-          <label
-            htmlFor={`likert-${preguntaId}-${opt.v}`}
-            className="likert-option__label"
-            title={opt.desc}
-          >
-            {opt.label}
-          </label>
+          <AccessibleTooltip content={opt.desc}>
+            <label
+              htmlFor={`likert-${preguntaId}-${opt.v}`}
+              className="likert-option__label"
+            >
+              {opt.label}
+            </label>
+          </AccessibleTooltip>
         </div>
       ))}
     </div>
@@ -336,13 +338,15 @@ export default function SurveyPage() {
                       >
                         {pregunta.texto_pregunta}
                         {pregunta.requerido && (
-                          <span
-                            className="survey-question__required"
-                            aria-label="obligatoria"
-                            title="Pregunta obligatoria"
-                          >
-                            *
-                          </span>
+                          <AccessibleTooltip content="Pregunta obligatoria">
+                            <span
+                              className="survey-question__required"
+                              aria-label="obligatoria"
+                              tabIndex={0}
+                            >
+                              *
+                            </span>
+                          </AccessibleTooltip>
                         )}
                       </p>
 

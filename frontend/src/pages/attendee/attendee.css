@@ -251,8 +251,12 @@
   background: var(--color-primary-surface);
 }
 
+/* WCAG 1.4.1: font-weight + borde izquierdo refuerzan el cambio de color del checked */
 .accessibility-check input:checked + .accessibility-check__content {
   color: var(--color-primary);
+  font-weight: 600;
+  border-left: 3px solid var(--color-primary);
+  padding-left: var(--space-2);
 }
 
 .accessibility-check__icon {
@@ -382,19 +386,28 @@
   color: #fff;
 }
 
+/* WCAG 1.4.1: icono ::before refuerza que el badge indica "gratis" */
 .badge--free {
   background: rgba(5, 150, 105, 0.9);
   color: #fff;
 }
 
+.badge--free::before {
+  content: "✓ ";
+  font-weight: 800;
+}
+
+/* WCAG 1.4.1: borde izquierdo diferenciador para badges de accesibilidad */
 .badge--accessible-physical {
   background: rgba(37, 99, 235, 0.9);
   color: #fff;
+  border-left: 3px solid #1e40af;
 }
 
 .badge--accessible-sensory {
   background: rgba(217, 119, 6, 0.9);
   color: #fff;
+  border-left: 3px solid #b45309;
 }
 
 .event-card__body {
@@ -460,8 +473,13 @@
   color: var(--color-primary);
 }
 
+/* WCAG 1.4.1: underline decorativo refuerza el color verde de "gratis" */
 .event-card__price--free {
   color: var(--color-success);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
 }
 
 .event-card__slots {
@@ -470,14 +488,27 @@
   text-align: right;
 }
 
+/* WCAG 1.4.1: borde izquierdo + icono ::before refuerzan el cambio de color */
 .event-card__slots--low {
   color: var(--color-warning);
   font-weight: 600;
+  border-left: 3px solid var(--color-warning);
+  padding-left: 0.5rem;
+}
+
+.event-card__slots--low::before {
+  content: "⚠ ";
 }
 
 .event-card__slots--full {
   color: var(--color-error);
   font-weight: 600;
+  border-left: 3px solid var(--color-error);
+  padding-left: 0.5rem;
+}
+
+.event-card__slots--full::before {
+  content: "✕ ";
 }
 
 /* ── Empty State ────────────────────────────────────────────────────────── */
@@ -743,7 +774,8 @@
   color: var(--color-primary);
   font-size: var(--font-size-sm);
   font-weight: 600;
-  text-decoration: none;
+  text-decoration: underline;
+  text-underline-offset: 3px;
   padding: var(--space-2) var(--space-3);
   border: 2px solid var(--color-primary-border);
   border-radius: var(--radius-md);
@@ -792,8 +824,13 @@
   margin-bottom: var(--space-3);
 }
 
+/* WCAG 1.4.1: underline decorativo refuerza el color verde de "gratis" */
 .detail-price-card__price--free {
   color: var(--color-success);
+  text-decoration: underline;
+  text-decoration-style: dotted;
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
 }
 
 .detail-price-card__slots {
@@ -943,8 +980,10 @@
   background: var(--color-primary-surface);
 }
 
+/* WCAG 1.4.1: font-weight refuerza el cambio de color del checked */
 .a11y-option input:checked ~ .a11y-option__content {
   color: var(--color-primary);
+  font-weight: 700;
 }
 
 .a11y-option__icon {
@@ -1245,8 +1284,11 @@
   transition: color var(--transition-fast);
 }
 
+/* WCAG 1.4.1: scale + shadow refuerzan el cambio de color de las estrellas activas */
 .star-rating__star--active {
   color: #F59E0B;
+  transform: scale(1.15);
+  filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));
 }
 
 /* Likert Scale */

@@ -47,20 +47,27 @@
   gap: var(--space-3);
 }
 
+/* WCAG 1.4.1: underline permanente para que el color no sea el único indicador */
 .header__link {
   font-size: var(--font-size-sm);
   font-weight: 500;
   color: var(--color-text-secondary);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 4px;
+  text-decoration-color: var(--color-border);
   padding: var(--space-2) var(--space-3);
   border-radius: var(--radius-md);
-  transition: color var(--transition-fast), background var(--transition-fast);
+  transition: color var(--transition-fast), background var(--transition-fast), text-decoration-color var(--transition-fast);
 }
 
 .header__link:hover {
   color: var(--color-primary);
   background: var(--color-primary-surface);
-  text-decoration: none;
+  text-decoration: underline;
+  text-decoration-color: var(--color-primary);
+  text-underline-offset: 4px;
+  text-decoration-thickness: 2px;
 }
 
 .header__user-menu {

@@ -396,7 +396,7 @@ export default function EventRegistrationPage() {
                 </p>
 
                 <div
-                  className="a11y-options"
+                  className="a11y-options"  
                   role="group"
                   aria-label="Seleccione sus requerimientos de accesibilidad"
                 >

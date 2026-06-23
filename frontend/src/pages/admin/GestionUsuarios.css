@@ -251,13 +251,9 @@
 
 .admin-table__email {
   color: #2563eb;
-  text-decoration: none;
-  font-size: 0.85rem;
-}
-
-.admin-table__email:hover,
-.admin-table__email:focus-visible {
   text-decoration: underline;
+  text-underline-offset: 3px;
+  font-size: 0.85rem;
 }
 
 .admin-table__rol-select {
@@ -289,13 +285,19 @@
   letter-spacing: 0.02em;
 }
 
+/* WCAG 1.4.1: role badges — border-left como indicador no-color */
 .admin-badge--asistente   { background: #f3f4f6; color: #374151; }
-.admin-badge--organizador { background: #dbeafe; color: #1e40af; }
-.admin-badge--admin       { background: #fce7f3; color: #9d174d; }
+.admin-badge--organizador { background: #dbeafe; color: #1e40af; border-left: 3px solid #1e40af; }
+.admin-badge--admin       { background: #fce7f3; color: #9d174d; border-left: 3px solid #9d174d; font-weight: 700; }
 
-.admin-badge--estado-activo   { background: #d1fae5; color: #065f46; }
-.admin-badge--estado-pendiente { background: #fef3c7; color: #92400e; }
-.admin-badge--estado-suspendido { background: #fee2e2; color: #991b1b; }
+/* WCAG 1.4.1: status badges — icono ::before + border-left como indicadores no-color */
+.admin-badge--estado-activo   { background: #d1fae5; color: #065f46; border-left: 3px solid #065f46; }
+.admin-badge--estado-pendiente { background: #fef3c7; color: #92400e; border-left: 3px solid #92400e; }
+.admin-badge--estado-suspendido { background: #fee2e2; color: #991b1b; border-left: 3px solid #991b1b; }
+
+.admin-badge--estado-activo::before    { content: "✓ "; font-weight: 800; }
+.admin-badge--estado-pendiente::before { content: "◷ "; }
+.admin-badge--estado-suspendido::before { content: "⊘ "; }
 
 /* ── Switch toggle ───────────────────────────────────────────────────────── */
 .admin-switch {
@@ -329,8 +331,11 @@
   flex-shrink: 0;
 }
 
+/* WCAG 1.4.1: borde visible refuerza el cambio de color del toggle */
 .admin-switch__input:checked + .admin-switch__track {
   background: #22c55e;
+  border: 2px solid #16a34a;
+  box-shadow: 0 0 0 1px #16a34a;
 }
 
 .admin-switch__input:focus-visible + .admin-switch__track {

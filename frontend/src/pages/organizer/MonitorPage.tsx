@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { organizerApi, type EventoStats, type Incidencia } from '../../api/organizerApi';
 import AlertMessage from '../../components/ui/AlertMessage';
+import AccessibleTooltip from '../../components/ui/AccessibleTooltip';
 import './organizer.css';
 
 type Criticidad = 'informativa' | 'advertencia' | 'critica';
@@ -73,10 +74,12 @@ export default function MonitorPage() {
           <h1 style={{ fontSize: 'var(--font-size-3xl)', fontWeight: 700, flex: 1 }}>
             📊 Monitor en Tiempo Real
           </h1>
-          <div className="monitor-pulse" aria-label="Actualización automática cada 10 segundos" title={`Última actualización: ${lastUpdate}`}>
-            <div className="monitor-pulse__dot" aria-hidden="true" />
-            <span>EN VIVO · {lastUpdate}</span>
-          </div>
+          <AccessibleTooltip content={`Última actualización: ${lastUpdate}`}>
+            <div className="monitor-pulse" aria-label="Actualización automática cada 10 segundos" tabIndex={0}>
+              <div className="monitor-pulse__dot" aria-hidden="true" />
+              <span>EN VIVO · {lastUpdate}</span>
+            </div>
+          </AccessibleTooltip>
         </div>
 
         {/* KPI Cards */}

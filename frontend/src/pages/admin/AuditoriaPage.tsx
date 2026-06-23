@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import AlertMessage from '../../components/ui/AlertMessage';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import AccessibleTooltip from '../../components/ui/AccessibleTooltip';
 import { adminApi, type LogAuditoria, type PaginatedLogs } from '../../api/adminApi';
 import './Auditoria.css';
 
@@ -242,9 +243,11 @@ export default function AuditoriaPage() {
                   return (
                     <tr key={log.id}>
                       <td data-label="Fecha/Hora" className="audit-table__time">
-                        <time dateTime={log.creado_en} title={log.creado_en}>
-                          {formatTimestamp(log.creado_en)}
-                        </time>
+                        <AccessibleTooltip content={log.creado_en}>
+                          <time dateTime={log.creado_en} tabIndex={0}>
+                            {formatTimestamp(log.creado_en)}
+                          </time>
+                        </AccessibleTooltip>
                       </td>
                       <td data-label="IP" className="audit-table__ip">
                         <code>{log.ip_address || '—'}</code>
@@ -252,9 +255,11 @@ export default function AuditoriaPage() {
                       <td data-label="Usuario" className="audit-table__user">
                         <span className="audit-table__email">{log.correo_usuario || '—'}</span>
                         {log.usuario_id && (
-                          <span className="audit-table__uid" title={log.usuario_id}>
-                            {log.usuario_id.slice(0, 8)}…
-                          </span>
+                          <AccessibleTooltip content={log.usuario_id}>
+                            <span className="audit-table__uid" tabIndex={0}>
+                              {log.usuario_id.slice(0, 8)}…
+                            </span>
+                          </AccessibleTooltip>
                         )}
                       </td>
                       <td data-label="Acción">

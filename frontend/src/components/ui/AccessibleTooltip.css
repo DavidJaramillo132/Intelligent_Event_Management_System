@@ -7,7 +7,7 @@
 .accessible-tooltip__content {
   position: absolute;
   z-index: calc(var(--z-accessibility) + 1);
-  bottom: calc(100% + var(--space-2));
+  bottom: 100%;
   left: 50%;
   width: max-content;
   max-width: min(18rem, calc(100vw - 2rem));
@@ -19,13 +19,15 @@
   box-shadow: var(--shadow-lg);
   font-size: var(--font-size-sm);
   line-height: 1.4;
+  overflow-wrap: anywhere;
+  pointer-events: auto;
   transform: translateX(-50%);
 }
 
 .accessible-tooltip__content::after {
   content: '';
   position: absolute;
-  top: 100%;
+  top: calc(100% - 1px);
   left: 50%;
   width: 0.75rem;
   height: 0.75rem;

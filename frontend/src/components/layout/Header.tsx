@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, type KeyboardEvent } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { LogOut, User, ChevronDown } from 'lucide-react';
+import './Header.css';
 
 export default function Header() {
   const { user, isAuthenticated, logout } = useAuth();
@@ -109,14 +110,14 @@ export default function Header() {
         {/* NAVEGACIÓN PRINCIPAL ADAPTABLE */}
         {/* NAVEGACIÓN PRINCIPAL CORREGIDA CON RUTAS ABSOLUTAS INTERPÁGINAS */}
         <nav className="hidden items-center gap-8 text-sm font-medium text-muted-foreground md:flex" aria-label="Navegacion principal">
-          <Link to="/eventos" className="hover:text-foreground transition-colors decoration-transparent" id="nav-explore-events">
+          <Link to="/eventos" className="header__link hover:text-foreground transition-colors" id="nav-explore-events">
             Explorar eventos
           </Link>
           {/* Cambiamos a Link y pasamos el estado de la sección */}
-          <Link to="/" state={{ scrollToSection: 'nosotros' }} className="hover:text-foreground transition-colors decoration-transparent">
+          <Link to="/" state={{ scrollToSection: 'nosotros' }} className="header__link hover:text-foreground transition-colors">
             Nosotros
           </Link>
-          <Link to="/" state={{ scrollToSection: 'contacto' }} className="hover:text-foreground transition-colors decoration-transparent">
+          <Link to="/" state={{ scrollToSection: 'contacto' }} className="header__link hover:text-foreground transition-colors">
             Contacto
           </Link>
           
@@ -125,20 +126,20 @@ export default function Header() {
             <>
               {(user?.rol === 'organizador' || user?.rol === 'admin') && (
                 <>
-                  <Link to="/organizador" className="hover:text-foreground transition-colors decoration-transparent" id="nav-organizer-hub">
+                  <Link to="/organizador" className="header__link hover:text-foreground transition-colors" id="nav-organizer-hub">
                     Mi Panel
                   </Link>
-                  <Link to="/eventos/crear" className="hover:text-foreground transition-colors decoration-transparent" id="nav-create-event">
+                  <Link to="/eventos/crear" className="header__link hover:text-foreground transition-colors" id="nav-create-event">
                     Crear Evento
                   </Link>
                 </>
               )}
               {user?.rol === 'admin' && (
                 <>
-                  <Link to="/admin/usuarios" className="hover:text-foreground transition-colors decoration-transparent" id="nav-admin-users">
+                  <Link to="/admin/usuarios" className="header__link hover:text-foreground transition-colors" id="nav-admin-users">
                     Usuarios
                   </Link>
-                  <Link to="/admin/auditoria" className="hover:text-foreground transition-colors decoration-transparent" id="nav-admin-audit">
+                  <Link to="/admin/auditoria" className="header__link hover:text-foreground transition-colors" id="nav-admin-audit">
                     Auditoria
                   </Link>
                 </>
@@ -208,7 +209,7 @@ export default function Header() {
             </div>
           ) : (
             <div className="flex items-center gap-4">
-              <Link to="/login" className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors decoration-transparent" id="nav-login">
+              <Link to="/login" className="header__link text-sm font-medium text-muted-foreground hover:text-foreground transition-colors" id="nav-login">
                 Iniciar sesión
               </Link>
               {/* EL BOTÓN CON EL DEGRADADO EXACTO EXTRAÍDO DE TU ARCHIVO DE ESTILOS */}

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiRequest } from '../../api/client';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import AlertMessage from '../../components/ui/AlertMessage';
+import AccessibleTooltip from '../../components/ui/AccessibleTooltip';
 import { detectLanguage } from '../../utils/language';
 import './attendee.css';
 import evCyber from '../../assets/ev-cyber.jpg';
@@ -159,10 +160,14 @@ function EventCard({ evento }: { evento: Evento }) {
         {/* Iconos Flotantes de Accesibilidad con un look moderno y limpio */}
         <div className="absolute bottom-4 right-4 flex gap-1.5 bg-background/60 backdrop-blur-md p-1.5 rounded-xl shadow-sm">
           {evento.accesibilidad_fisica && (
-            <span className="text-sm" aria-label="Accesibilidad física disponible" title="Lugar con accesibilidad física">♿</span>
+            <AccessibleTooltip content="Lugar con accesibilidad física">
+              <span className="text-sm" aria-label="Accesibilidad física disponible" tabIndex={0}>♿</span>
+            </AccessibleTooltip>
           )}
           {evento.accesibilidad_sensorial && (
-            <span className="text-sm" aria-label="Accesibilidad sensorial disponible" title="Lugar con accesibilidad sensorial">👂</span>
+            <AccessibleTooltip content="Lugar con accesibilidad sensorial">
+              <span className="text-sm" aria-label="Accesibilidad sensorial disponible" tabIndex={0}>👂</span>
+            </AccessibleTooltip>
           )}
         </div>
       </div>

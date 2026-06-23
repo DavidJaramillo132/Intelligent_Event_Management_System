@@ -275,15 +275,19 @@
     line-height: 1.7;
   }
 
+  /* WCAG 1.4.1: links llevan underline para no depender solo del color */
   a {
     color: var(--color-primary);
-    text-decoration: none;
-    transition: color var(--transition-fast);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 2px;
+    transition: color var(--transition-fast), text-decoration-thickness var(--transition-fast);
   }
 
   a:hover {
     color: var(--color-primary-hover);
     text-decoration: underline;
+    text-decoration-thickness: 2px;
   }
 
   /* Indicador Visual de Enfoque Teclado (WCAG 2.4.7) */

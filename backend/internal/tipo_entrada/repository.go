@@ -43,6 +43,16 @@ func (r *Repository) ContarInscritosPorEvento(eventoID string) (int64, error) {
 	return count, err
 }
 
+func (r *Repository) ObtenerCapacidadEvento(eventoID string) (int, error) {
+	var evento models.Evento
+	if err := db.GetDB().
+		Select("capacidad").
+		First(&evento, "id = ?", eventoID).Error; err != nil {
+		return 0, err
+	}
+	return evento.Capacidad, nil
+}
+
 func (r *Repository) IncrementarCupos(tipoEntradaID string) error {
 	return db.GetDB().Model(&models.TipoEntrada{}).
 		Where("id = ?", tipoEntradaID).

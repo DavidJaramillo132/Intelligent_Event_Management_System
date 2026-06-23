@@ -57,6 +57,14 @@ func (s *Service) ListarPorEvento(eventoID string) ([]TipoEntradaResponse, error
 }
 
 func (s *Service) ObtenerDisponibilidad(eventoID string, capacidadTotal int) (*DisponibilidadResponse, error) {
+	if capacidadTotal <= 0 {
+		capacidad, err := s.repo.ObtenerCapacidadEvento(eventoID)
+		if err != nil {
+			return nil, fiber.NewError(fiber.StatusNotFound, "Evento no encontrado")
+		}
+		capacidadTotal = capacidad
+	}
+
 	tipos, err := s.repo.ListarPorEvento(eventoID)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error consultando disponibilidad")
@@ -72,10 +80,15 @@ func (s *Service) ObtenerDisponibilidad(eventoID string, capacidadTotal int) (*D
 		tiposResp = append(tiposResp, *toResponse(te))
 	}
 
+	cuposDisponibles := capacidadTotal - int(inscritos)
+	if cuposDisponibles < 0 {
+		cuposDisponibles = 0
+	}
+
 	return &DisponibilidadResponse{
 		CapacidadTotal:   capacidadTotal,
 		Inscritos:        int(inscritos),
-		CuposDisponibles: capacidadTotal - int(inscritos),
+		CuposDisponibles: cuposDisponibles,
 		TiposEntrada:     tiposResp,
 	}, nil
 }

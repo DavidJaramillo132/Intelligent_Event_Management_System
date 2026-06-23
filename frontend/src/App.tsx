@@ -17,6 +17,7 @@ import {
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import AccessibilityMenu from './components/ui/AccessibilityMenu';
+import AccessibleTooltip from './components/ui/AccessibleTooltip';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import CreateEventPage from './pages/events/CreateEventPage';
@@ -33,7 +34,7 @@ import CheckinPage from './pages/organizer/CheckinPage';
 import MonitorPage from './pages/organizer/MonitorPage';
 import ReportPage from './pages/organizer/ReportPage';
 import './App.css';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { apiRequest } from './api/client';
 
 import heroImg from "./assets/hero-event.jpg"; 
@@ -95,6 +96,15 @@ function HomePage() {
   // Estado unificado usando la interfaz completa Evento
   const [eventosReales, setEventosReales] = useState<Evento[]>([]);
   const [loadingEventos, setLoadingEventos] = useState(true);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [userPaused, setUserPaused] = useState(false);   // explicit user toggle
+  const [hoverPaused, setHoverPaused] = useState(false);  // hover/focus temporary pause
+  const slideIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
+  const [progressKey, setProgressKey] = useState(0);      // forces CSS animation restart
+
+  // Derived: carousel is effectively paused when user OR hover says so
+  const isPaused = userPaused || hoverPaused;
 
   useEffect(() => {
     document.title = "Inicio - Gestión Inteligente de Eventos | EventosPro";
@@ -140,6 +150,65 @@ function HomePage() {
 
     fetchEventos();
   }, []);
+
+  // Auto-rotación del carrusel con WCAG 2.2.2
+  // The interval only runs when neither user nor hover has paused.
+  useEffect(() => {
+    if (isPaused || eventosReales.length <= 1) {
+      if (slideIntervalRef.current) {
+        clearInterval(slideIntervalRef.current);
+        slideIntervalRef.current = null;
+      }
+      return;
+    }
+
+    // Reset progress bar animation every time the interval restarts
+    setProgressKey(k => k + 1);
+
+    slideIntervalRef.current = setInterval(() => {
+      setCurrentSlide(prev => {
+        const next = (prev + 1) % eventosReales.length;
+        // Restart progress bar for the new slide
+        setProgressKey(k => k + 1);
+        return next;
+      });
+    }, 5000);
+
+    return () => {
+      if (slideIntervalRef.current) {
+        clearInterval(slideIntervalRef.current);
+        slideIntervalRef.current = null;
+      }
+    };
+  }, [isPaused, eventosReales.length]);
+
+  const goToSlide = useCallback((index: number) => {
+    setCurrentSlide(index);
+    setProgressKey(k => k + 1);
+    // Don't force-pause: respect the user's existing pause preference
+  }, []);
+
+  const prevSlide = useCallback(() => {
+    setCurrentSlide(prev => (prev - 1 + eventosReales.length) % eventosReales.length);
+    setProgressKey(k => k + 1);
+  }, [eventosReales.length]);
+
+  const nextSlide = useCallback(() => {
+    setCurrentSlide(prev => (prev + 1) % eventosReales.length);
+    setProgressKey(k => k + 1);
+  }, [eventosReales.length]);
+
+  // WCAG 2.2.2: explicit user control over auto-rotation
+  const togglePause = useCallback(() => {
+    setUserPaused(prev => !prev);
+  }, []);
+
+  // Hover/focus temporarily suppress auto-rotation but never override user intent
+  const handleCarouselMouseEnter = useCallback(() => setHoverPaused(true), []);
+  const handleCarouselMouseLeave = useCallback(() => setHoverPaused(false), []);
+  const handleCarouselFocusCapture = useCallback(() => setHoverPaused(true), []);
+  const handleCarouselBlurCapture = useCallback(() => setHoverPaused(false), []);
+
   return (
     <div className="min-h-screen bg-background text-foreground animate-fade-in" id="main-content">
       <main>
@@ -338,9 +407,27 @@ function HomePage() {
               <summary className="cursor-pointer font-medium text-foreground">
                 📄 Transcripción y descripción del video
               </summary>
-              <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-                <p>El video muestra el evento del 25 aniversario de GTT en Alicante: recepción de asistentes, keynote principal, sesiones de networking y cierre del evento. La información visual (escenario, asistentes, logotipos) es decorativa y no añade contenido adicional al audio principal.</p>
-                <p className="text-xs">
+              <div className="mt-3 space-y-4 text-sm text-muted-foreground">
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Descripción</h3>
+                  <p>El video muestra el evento del 25 aniversario de GTT en Alicante: recepción de asistentes, keynote principal, sesiones de networking y cierre del evento. La información visual (escenario, asistentes, logotipos) es decorativa y no añade contenido adicional al audio principal.</p>
+                </div>
+                <div>
+                  <h3 className="font-semibold text-foreground mb-2">Transcripción</h3>
+                  <div className="space-y-1 text-xs leading-relaxed">
+                    <p><strong className="text-foreground">0:11</strong> Realmente es una satisfacción muy grande poder tenernos aquí a todos juntos hoy y sobre todo no olvidemos lo importante que es tener en cuenta nuestros principios, recordando de dónde venimos, quiénes somos, quién, en definitiva, nuestros orígenes.</p>
+                    <p><strong className="text-foreground">0:35</strong> Ninguna compañía se mantiene a flote durante 25 años en una sólida base de clientes y desde aquí tenemos que agradecerles su confianza y su credibilidad.</p>
+                    <p><strong className="text-foreground">0:46</strong> Somos los referentes en el ámbito de la tecnología tributaria.</p>
+                    <p><strong className="text-foreground">0:54</strong> El gran impulso de realizar todo lo que hemos hecho es esas ganas de transformar la sociedad, de mejorar la sociedad y eso, destinados al ciudadano, porque es la esencia de nuestro trabajo.</p>
+                    <p><strong className="text-foreground">1:08</strong> Me gustaría que se incorporase Paco de la Torre, que yo sin Paco de la Torre no hubiese sido capaz de hacer esto, gracias.</p>
+                    <p><strong className="text-foreground">1:18</strong> Yo creo que nunca hemos tenido miedo a nada, nunca, y nunca hemos tenido la sensación de fracaso o de que nos podía ir mal, jamás, nunca.</p>
+                    <p><strong className="text-foreground">1:29</strong> Yo no tengo ninguna duda de que GTT es la mejor empresa del mundo. El día que todos vosotros tengáis constancia y tengáis la seguridad de que trabajáis en la mejor empresa del mundo, GTT realmente será la mejor empresa del mundo.</p>
+                    <p><strong className="text-foreground">1:52</strong> Ahora mismo estamos aquí 900 y pico personas viéndonos y todos pendientes de todos nosotros, pero hoy es vuestro día y que pasen, por favor, Alicia.</p>
+                    <p><strong className="text-foreground">2:10</strong> [Música]</p>
+                    <p><strong className="text-foreground">2:32</strong> Tenemos que sentirnos muy orgullosos, tenemos un futuro impresionante por delante como se está demostrando, disfrutemos.</p>
+                  </div>
+                </div>
+                <p className="text-xs pt-2 border-t border-border/40">
                   No se requiere audiodescripción adicional. Subtítulos disponibles en el reproductor de YouTube (botón CC). También puedes{' '}
                   <a
                     href="https://www.youtube.com/watch?v=OWWJPNIX0V0"
@@ -357,83 +444,203 @@ function HomePage() {
           </div>
         </section>
 
-        {/* ── ESCAPARATE DE PRÓXIMOS EVENTOS (TARJETAS CONECTADAS REALES) ───────────────────────────── */}
+        {/* ── ESCAPARATE DE PRÓXIMOS EVENTOS (CARRUSEL + WCAG 2.2.2) ──────── */}
         <section id="eventos" className="border-t border-border/60 bg-muted/40 py-24 transition-colors duration-200">
           <div className="mx-auto max-w-7xl px-6">
-            <div className="mb-12 flex flex-wrap items-end justify-between gap-4">
+            <div className="lg:grid lg:grid-cols-2 lg:gap-16 xl:gap-24 items-center">
+
+              {/* ── Columna izquierda: texto descriptivo ──────────────── */}
               <div>
-                <p className="text-sm font-medium uppercase tracking-wider text-[oklch(0.52_0.25_285)] dark:text-indigo-400">Explorar catálogo</p>
+                <p className="text-sm font-medium uppercase tracking-wider text-[oklch(0.52_0.25_285)] dark:text-indigo-400">
+                  Explorar catálogo
+                </p>
                 <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
                   Descubre lo que está pasando
                 </h2>
+                <p className="mt-5 text-base leading-relaxed text-muted-foreground">
+                  Explora nuestra selección de eventos profesionales y culturales diseñados para conectar personas e ideas. Participa en conferencias, talleres, espacios de networking y actividades especiales orientadas al aprendizaje, la colaboración y el intercambio de conocimientos. Descubre nuevas oportunidades, amplía tu red de contactos y forma parte de experiencias enriquecedoras que impulsan el crecimiento personal y profesional.                
+                </p>
+
+                <ul className="mt-8 space-y-4">
+                  <li className="flex gap-4">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[oklch(0.52_0.25_285)]/10 text-[oklch(0.52_0.25_285)] dark:text-indigo-400 text-lg font-bold">
+                      +
+                    </span>
+                    <div>
+                      <p className="font-semibold text-foreground">{eventosReales.length > 0 ? eventosReales.length : '—'} eventos activos</p>
+                      <p className="text-sm text-muted-foreground">Eventos disponibles para inscripción</p>
+                    </div>
+                  </li>
+                  <li className="flex gap-4">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[oklch(0.52_0.25_285)]/10 text-[oklch(0.52_0.25_285)] dark:text-indigo-400 text-lg">
+                      ✓
+                    </span>
+                    <div>
+                      <p className="font-semibold text-foreground">100% accesibles</p>
+                      <p className="text-sm text-muted-foreground">Diseñados bajo estándares WCAG 2.2 AA</p>
+                    </div>
+                  </li>
+                  <li className="flex gap-4">
+                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[oklch(0.52_0.25_285)]/10 text-[oklch(0.52_0.25_285)] dark:text-indigo-400 text-lg">
+                      🎟
+                    </span>
+                    <div>
+                      <p className="font-semibold text-foreground">Entrada gratuita</p>
+                      <p className="text-sm text-muted-foreground">Registro sin costo para todos los asistentes</p>
+                    </div>
+                  </li>
+                </ul>
+
+                <Link
+                  to="/eventos"
+                  className="mt-8 inline-flex items-center gap-2 rounded-lg bg-[oklch(0.52_0.25_285)] hover:bg-[oklch(0.45_0.25_285)] dark:bg-indigo-600 dark:hover:bg-indigo-500 px-6 py-3 text-sm font-semibold text-white transition-all shadow-md"
+                >
+                  Explorar todos los eventos <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
-              <Link to="/eventos" className="inline-flex items-center gap-1 text-sm font-medium text-[oklch(0.52_0.25_285)] dark:text-indigo-400 hover:underline">
-                Ver todos los eventos reales <ArrowRight className="h-4 w-4" />
-              </Link>
-            </div>
-            <div className="grid gap-6 md:grid-cols-3">
-              {loadingEventos ? (
-                <div className="col-span-3 flex justify-center items-center py-12">
-                  <div className="text-center">
-                    <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
-                      <span className="sr-only">Cargando eventos...</span>
+
+              {/* ── Columna derecha: carrusel ─────────────────────────── */}
+              <div className="mt-12 lg:mt-0 max-w-lg mx-auto lg:mx-0">
+                {loadingEventos ? (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="text-center">
+                      <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent align-[-0.125em] motion-reduce:animate-[spin_1.5s_linear_infinite]" role="status">
+                        <span className="sr-only">Cargando eventos...</span>
+                      </div>
+                      <p className="mt-3 text-sm text-muted-foreground">Cargando eventos destacados...</p>
                     </div>
-                    <p className="mt-3 text-sm text-muted-foreground">Cargando eventos destacados...</p>
                   </div>
-                </div>
-              ) : eventosReales.length === 0 ? (
-                <div className="col-span-3 text-center py-12">
-                  <p className="text-muted-foreground">No hay eventos disponibles en este momento.</p>
-                </div>
-              ) : (
-                eventosReales.map((e, index) => (
-                  <article
-                    key={e.id || index}
-                    onClick={() => navigate(`/eventos/${e.id}`)}
-                    className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer"
-                    role="button"
-                    tabIndex={0}
-                    aria-label={`Ver detalles del evento ${e.titulo}`}
-                    onKeyDown={(evt) => { if (evt.key === 'Enter' || evt.key === ' ') { evt.preventDefault(); navigate(`/eventos/${e.id}`); } }}
+                ) : eventosReales.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-muted-foreground">No hay eventos disponibles en este momento.</p>
+                  </div>
+                ) : (
+                  <div
+                    ref={carouselRef}
+                    onMouseEnter={handleCarouselMouseEnter}
+                    onMouseLeave={handleCarouselMouseLeave}
+                    onFocusCapture={handleCarouselFocusCapture}
+                    onBlurCapture={handleCarouselBlurCapture}
+                    role="region"
+                    aria-roledescription="carousel"
+                    aria-label="Eventos destacados"
+                    aria-live="polite"
                   >
-                    <div className="aspect-[4/3] relative overflow-hidden bg-muted">
-                      <img
-                        src={e.imagen_portada || getEventImage(e.titulo)}
-                        alt={`Portada de ${e.titulo}`}
-                        className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                      />
-                      <span className="absolute top-4 left-4 inline-block rounded-full bg-indigo-50 dark:bg-indigo-950 px-3 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-300 shadow-sm">
-                        {e.tipo_evento_nombre || 'Evento'}
-                      </span>
-                    </div>
-                    <div className="p-6">
-                      <h3 className="text-lg font-semibold leading-snug text-foreground group-hover:text-[oklch(0.52_0.25_285)] dark:group-hover:text-indigo-400 transition-colors">
-                        {e.titulo}
-                      </h3>
-                      <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
-                        <span className="inline-flex items-center gap-1.5">
-                          <Calendar className="h-3.5 w-3.5" /> {formatDate(e.inicio)}
-                        </span>
-                        <span className="inline-flex items-center gap-1.5">
-                          <MapPin className="h-3.5 w-3.5" /> {e.lugar_nombre || 'Sede Remota'}
-                        </span>
-                      </div>
-                      <div className="mt-5 pt-4 border-t border-border/40">
-                        <button 
-                          type="button"
-                          className="w-full inline-flex justify-center items-center gap-2 rounded-lg bg-muted hover:bg-indigo-50 dark:hover:bg-indigo-950/40 px-4 py-2 text-xs font-semibold text-foreground hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors"
-                          onClick={(evt) => {
-                            evt.stopPropagation();
-                            navigate(`/eventos/${e.id}`);
-                          }}
+                    <div className="carousel-wrapper">
+                      <div
+                        className="carousel-track"
+                        style={{ transform: `translateX(-${currentSlide * 100}%)` }}
+                      >
+                      {eventosReales.map((e, index) => (
+                        <div
+                          key={e.id || index}
+                          className="carousel-slide"
+                          role="group"
+                          aria-roledescription="slide"
+                          aria-label={`${index + 1} de ${eventosReales.length}: ${e.titulo}`}
                         >
-                          Ver información completa
-                        </button>
+                          <article
+                            onClick={() => navigate(`/eventos/${e.id}`)}
+                            className="group overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all hover:-translate-y-1 hover:shadow-md cursor-pointer"
+                            role="button"
+                            tabIndex={index === currentSlide ? 0 : -1}
+                            aria-label={`Ver detalles del evento ${e.titulo}`}
+                            onKeyDown={(evt) => { if (evt.key === 'Enter' || evt.key === ' ') { evt.preventDefault(); navigate(`/eventos/${e.id}`); } }}
+                          >
+                            <div className="aspect-[4/3] relative overflow-hidden bg-muted">
+                              <img
+                                src={e.imagen_portada || getEventImage(e.titulo)}
+                                alt={`Portada de ${e.titulo}`}
+                                className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                              <span className="absolute top-4 left-4 inline-block rounded-full bg-indigo-50 dark:bg-indigo-950 px-3 py-1 text-xs font-medium text-indigo-700 dark:text-indigo-300 shadow-sm">
+                                {e.tipo_evento_nombre || 'Evento'}
+                              </span>
+                              <div className="progress-bar">
+                                <div
+                                  key={index === currentSlide ? `active-${currentSlide}-${progressKey}` : `inactive-${index}`}
+                                  className={`progress-bar__fill ${index === currentSlide && !isPaused ? 'progress-bar__fill--active' : ''} ${isPaused && index === currentSlide ? 'progress-bar__fill--paused' : ''}`}
+                                />
+                              </div>
+                            </div>
+                            <div className="p-6">
+                              <h3 className="text-lg font-semibold leading-snug text-foreground group-hover:text-[oklch(0.52_0.25_285)] dark:group-hover:text-indigo-400 transition-colors">
+                                {e.titulo}
+                              </h3>
+                              <div className="mt-4 flex flex-wrap gap-4 text-xs text-muted-foreground">
+                                <span className="inline-flex items-center gap-1.5">
+                                  <Calendar className="h-3.5 w-3.5" /> {formatDate(e.inicio)}
+                                </span>
+                                <span className="inline-flex items-center gap-1.5">
+                                  <MapPin className="h-3.5 w-3.5" /> {e.lugar_nombre || 'Sede Remota'}
+                                </span>
+                              </div>
+                              <div className="mt-5 pt-4 border-t border-border/40">
+                                <button 
+                                  type="button"
+                                  className="w-full inline-flex justify-center items-center gap-2 rounded-lg bg-muted hover:bg-indigo-50 dark:hover:bg-indigo-950/40 px-4 py-2 text-xs font-semibold text-foreground hover:text-indigo-700 dark:hover:text-indigo-400 transition-colors"
+                                  onClick={(evt) => {
+                                    evt.stopPropagation();
+                                    navigate(`/eventos/${e.id}`);
+                                  }}
+                                >
+                                  Ver información completa
+                                </button>
+                              </div>
+                            </div>
+                          </article>
+                        </div>
+                      ))}
                       </div>
                     </div>
-                  </article>
-                ))
-              )}
+
+                    {eventosReales.length > 1 && (
+                      <>
+                        <div className="flex items-center justify-center gap-4 mt-6" role="toolbar" aria-label="Controles del carrusel">
+                          <button
+                            onClick={prevSlide}
+                            className="carousel-btn"
+                            aria-label="Evento anterior"
+                          >
+                            ←
+                          </button>
+                          <AccessibleTooltip content={userPaused ? 'Reanudar' : 'Pausar'}>
+                            <button
+                              onClick={togglePause}
+                              className={`carousel-btn carousel-btn--pause${userPaused ? ' carousel-btn--pause-active' : ''}`}
+                              aria-pressed={userPaused}
+                              aria-label={userPaused ? 'Reanudar rotación automática' : 'Pausar rotación automática'}
+                            >
+                              {userPaused ? '▶' : '⏸'}
+                            </button>
+                          </AccessibleTooltip>
+                          <button
+                            onClick={nextSlide}
+                            className="carousel-btn"
+                            aria-label="Siguiente evento"
+                          >
+                            →
+                          </button>
+                        </div>
+
+                        <div className="flex items-center justify-center gap-2 mt-3" role="tablist" aria-label="Seleccionar evento">
+                          {eventosReales.map((e, i) => (
+                            <button
+                              key={i}
+                              role="tab"
+                              className={`carousel-dot ${i === currentSlide ? 'carousel-dot--active' : ''}`}
+                              aria-selected={i === currentSlide}
+                              aria-label={`Ir al evento ${i + 1}: ${e.titulo}`}
+                              onClick={() => goToSlide(i)}
+                            />
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
+              </div>
+
             </div>
           </div>
         </section>
