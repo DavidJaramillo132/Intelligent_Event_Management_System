@@ -445,7 +445,7 @@
 
 .checkin-manual input {
   background: rgba(255,255,255,0.08);
-  border: 2px solid rgba(255,255,255,0.2);
+  border: 2px solid rgba(255,255,255,0.5);
   color: #fff;
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-4);
@@ -455,7 +455,6 @@
 
 .checkin-manual input:focus {
   border-color: var(--color-primary-light);
-  outline: none;
 }
 
 .checkin-manual input::placeholder {

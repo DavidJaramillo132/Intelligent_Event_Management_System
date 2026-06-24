@@ -37,13 +37,13 @@
   --color-primary-hover: #5B21B6;
   --color-primary-light: #8B5CF6;
   --color-primary-surface: rgba(108, 58, 237, 0.08);
-  --color-primary-border: rgba(108, 58, 237, 0.3);
+  --color-primary-border: rgba(108, 58, 237, 0.5);
 
   /* Paleta de Neutros Semánticos Adaptables */
   --color-bg: #FAFAFA;
   --color-surface: #FFFFFF;
   --color-surface-raised: #FFFFFF;
-  --color-border: #D1D5DB;
+  --color-border: #9CA3AF;
   --color-border-strong: #636366;
   --color-text: #1F2937;
   --color-text-secondary: #4B5563;
@@ -53,16 +53,16 @@
   /* Colores de Alertas Semánticas */
   --color-success: #059669;
   --color-success-bg: #ECFDF5;
-  --color-success-border: #A7F3D0;
+  --color-success-border: #34D399;
   --color-error: #DC2626;
   --color-error-bg: #FEF2F2;
-  --color-error-border: #FECACA;
+  --color-error-border: #F87171;
   --color-warning: #D97706;
   --color-warning-bg: #FFFBEB;
-  --color-warning-border: #FDE68A;
+  --color-warning-border: #FBBF24;
   --color-info: #2563EB;
   --color-info-bg: #EFF6FF;
-  --color-info-border: #BFDBFE;
+  --color-info-border: #60A5FA;
 
   /* Deshabilitados */
   --color-disabled-bg: #F3F4F6;
@@ -137,7 +137,7 @@
   --color-primary-hover: #A78BFA;
   --color-primary-light: #C4B5FD;
   --color-primary-surface: rgba(139, 92, 246, 0.12);
-  --color-primary-border: rgba(139, 92, 246, 0.4);
+  --color-primary-border: rgba(139, 92, 246, 0.5);
 
   --color-bg: #0F0F14;
   --color-surface: #1A1A24;
@@ -151,16 +151,16 @@
 
   --color-success: #34D399;
   --color-success-bg: rgba(52, 211, 153, 0.1);
-  --color-success-border: rgba(52, 211, 153, 0.3);
+  --color-success-border: rgba(52, 211, 153, 0.5);
   --color-error: #F87171;
   --color-error-bg: rgba(248, 113, 113, 0.1);
-  --color-error-border: rgba(248, 113, 113, 0.3);
+  --color-error-border: rgba(248, 113, 113, 0.5);
   --color-warning: #FBBF24;
   --color-warning-bg: rgba(251, 191, 36, 0.1);
-  --color-warning-border: rgba(251, 191, 36, 0.3);
+  --color-warning-border: rgba(251, 191, 36, 0.5);
   --color-info: #60A5FA;
   --color-info-bg: rgba(96, 165, 250, 0.1);
-  --color-info-border: rgba(96, 165, 250, 0.3);
+  --color-info-border: rgba(96, 165, 250, 0.5);
 
   --color-disabled-bg: #1F1F2E;
   --color-disabled-text: #4B5563;

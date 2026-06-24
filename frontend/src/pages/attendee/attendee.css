@@ -61,7 +61,7 @@
   font-size: var(--font-size-base);
   color: var(--color-text);
   background: #fff;
-  border: 2px solid transparent;
+  border: 2px solid var(--color-border-strong);
   border-radius: var(--radius-lg);
   padding: var(--space-3) var(--space-5);
   min-height: 2.75rem;
@@ -1286,7 +1286,7 @@
 
 /* WCAG 1.4.1: scale + shadow refuerzan el cambio de color de las estrellas activas */
 .star-rating__star--active {
-  color: #F59E0B;
+  color: #D97706;
   transform: scale(1.15);
   filter: drop-shadow(0 0 2px rgba(245, 158, 11, 0.5));
 }
@@ -1315,7 +1315,7 @@
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-3) var(--space-4);
-  border: 2px solid var(--color-border);
+  border: 2px solid var(--color-border-strong);
   border-radius: var(--radius-lg);
   cursor: pointer;
   min-width: 3.5rem;

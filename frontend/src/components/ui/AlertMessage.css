@@ -59,7 +59,7 @@
   cursor: pointer;
   font-size: var(--font-size-lg);
   color: inherit;
-  opacity: 0.6;
+  opacity: 0.8;
   padding: var(--space-1);
   line-height: 1;
   transition: opacity var(--transition-fast);

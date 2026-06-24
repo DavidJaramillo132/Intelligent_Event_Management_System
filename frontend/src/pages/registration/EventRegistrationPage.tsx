@@ -1,4 +1,5 @@
-import { useState, useEffect, useRef, type FormEvent } from 'react';
+import { useState, useEffect, useRef } from 'react';
+import type { FormEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { api } from '../../api/client';
@@ -118,6 +119,40 @@ function CapacityModal({ onClose, onExplore }: { onClose: () => void; onExplore:
   );
 }
 
+/* ── Success sound ─────────────────────────────────────────────────────── */
+
+function playSuccessSound() {
+  try {
+    const stored = localStorage.getItem('a11y-prefs');
+    const prefs = stored ? JSON.parse(stored) : {};
+    // soundEnabled defaults to true when the key is absent
+    if (prefs.soundEnabled === false) return;
+
+    const ctx = new (window.AudioContext || (window as Window & { webkitAudioContext?: typeof AudioContext }).webkitAudioContext)();
+
+    // Short celebratory two-tone chime
+    const notes = [523.25, 783.99]; // C5 → G5
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(freq, ctx.currentTime + i * 0.18);
+
+      gain.gain.setValueAtTime(0, ctx.currentTime + i * 0.18);
+      gain.gain.linearRampToValueAtTime(0.35, ctx.currentTime + i * 0.18 + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.18 + 0.4);
+
+      osc.start(ctx.currentTime + i * 0.18);
+      osc.stop(ctx.currentTime + i * 0.18 + 0.4);
+    });
+  } catch {
+    // AudioContext not supported — fail silently
+  }
+}
+
 /* ── Main Page ─────────────────────────────────────────────────────────── */
 
 export default function EventRegistrationPage() {
@@ -232,6 +267,7 @@ export default function EventRegistrationPage() {
       });
       setInscripcionId(res.data?.id ?? null);
       setSuccess(true);
+      playSuccessSound();
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al inscribirse';
       if (msg.toLowerCase().includes('aforo') || msg.toLowerCase().includes('cupo') || msg.includes('409') || msg.includes('capacity')) {
@@ -593,3 +629,4 @@ export default function EventRegistrationPage() {
     </main>
   );
 }
+

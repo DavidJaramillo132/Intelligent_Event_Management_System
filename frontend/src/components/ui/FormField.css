@@ -12,6 +12,7 @@
 
 .form-field__input {
   width: 100%;
+  background: var(--color-bg);
 }
 
 .form-field__input--error {

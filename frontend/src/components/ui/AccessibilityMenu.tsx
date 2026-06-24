@@ -8,6 +8,7 @@ interface A11yPrefs {
   largeCursor: boolean;
   reduceMotion: boolean;
   wideSpacing: boolean;
+  soundEnabled: boolean;
 }
 
 const defaultPrefs: A11yPrefs = {
@@ -17,6 +18,7 @@ const defaultPrefs: A11yPrefs = {
   largeCursor: false,
   reduceMotion: false,
   wideSpacing: false,
+  soundEnabled: true,
 };
 
 function loadPrefs(): A11yPrefs {
@@ -54,6 +56,10 @@ export default function AccessibilityMenu() {
     setPrefs(prev => ({ ...prev, ...patch }));
   };
 
+  const handleReset = () => {
+    setPrefs(defaultPrefs);
+  };
+
   return (
     <div className="a11y-menu">
       <button
@@ -73,8 +79,19 @@ export default function AccessibilityMenu() {
           className="a11y-menu__panel animate-slide-up"
           role="dialog"
           aria-label="Opciones de accesibilidad"
+          aria-modal="true"
         >
-          <h3 className="a11y-menu__title">Accesibilidad</h3>
+          <div className="a11y-menu__header">
+            <h3 className="a11y-menu__title">Accesibilidad</h3>
+            <button
+              type="button"
+              className="a11y-menu__close"
+              onClick={() => setOpen(false)}
+              aria-label="Cerrar menú de accesibilidad"
+            >
+              ✕
+            </button>
+          </div>
 
           {/* Font Size */}
           <div className="a11y-menu__group">
@@ -101,6 +118,7 @@ export default function AccessibilityMenu() {
             { key: 'largeCursor' as const, icon: '🖱️', label: 'Cursor grande' },
             { key: 'reduceMotion' as const, icon: '⏸️', label: 'Reducir animaciones' },
             { key: 'wideSpacing' as const, icon: '📖', label: 'Espaciado ampliado' },
+            { key: 'soundEnabled' as const, icon: '🔊', label: 'Sonido de confirmación' },
           ].map(({ key, icon, label }) => (
             <label key={key} className="a11y-menu__toggle">
               <span>{icon} {label}</span>
@@ -114,7 +132,7 @@ export default function AccessibilityMenu() {
 
           <button
             className="btn btn-ghost btn-sm a11y-menu__reset"
-            onClick={() => setPrefs(defaultPrefs)}
+            onClick={handleReset}
             type="button"
           >
             Restablecer todo
