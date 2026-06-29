@@ -7,11 +7,11 @@ import (
 	"main.go/models"
 )
 
-// Migrate aplica AutoMigrate sólo para los modelos que requieren sincronización de esquema.
-// El esquema base se gestiona con docker/db/init/001_create_tables.sql.
+// Migrate aplica AutoMigrate únicamente para ajustes incrementales sobre el
+// esquema base ya creado por docker/db/init/001_create_tables.sql.
+// Solo incluir modelos que necesiten columnas nuevas que el SQL no tiene.
 func Migrate(conn *gorm.DB) {
 	if err := conn.AutoMigrate(
-		&models.Usuario{},
 		&models.LogAuditoria{},
 	); err != nil {
 		log.Printf("⚠️  AutoMigrate warning: %v", err)

@@ -24,6 +24,7 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isAuthenticated: boolean;
+  initializing: boolean;
   login: (correo: string, contrasena: string) => Promise<void>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
@@ -47,23 +48,41 @@ interface RegisterData {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+/** Lee el auth guardado en localStorage de forma síncrona */
+function readStoredAuth(): { user: User | null; token: string | null } {
+  try {
+    const stored = localStorage.getItem('auth');
+    if (!stored) return { user: null, token: null };
+    const auth: AuthState = JSON.parse(stored);
+    if (auth?.token && auth?.usuario) {
+      return { user: auth.usuario, token: auth.token };
+    }
+  } catch {
+    localStorage.removeItem('auth');
+  }
+  return { user: null, token: null };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
-  const [token, setToken] = useState<string | null>(null);
+  // Inicialización lazy síncrona: evita el gap de null → estado real al refrescar
+  const [user, setUser] = useState<User | null>(() => readStoredAuth().user);
+  const [token, setToken] = useState<string | null>(() => readStoredAuth().token);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  
+  // initializing siempre false porque la hidratación es síncrona en el constructor del state
+  const initializing = false;
 
+  // Sincroniza en caso de cambios en otra pestaña
   useEffect(() => {
-    const stored = localStorage.getItem('auth');
-    if (stored) {
-      try {
-        const auth: AuthState = JSON.parse(stored);
-        setUser(auth.usuario);
-        setToken(auth.token);
-      } catch {
-        localStorage.removeItem('auth');
-      }
-    }
+    const handleStorage = (e: StorageEvent) => {
+      if (e.key !== 'auth') return;
+      const { user: u, token: t } = readStoredAuth();
+      setUser(u);
+      setToken(t);
+    };
+    window.addEventListener('storage', handleStorage);
+    return () => window.removeEventListener('storage', handleStorage);
   }, []);
 
   const login = async (correo: string, contrasena: string) => {
@@ -127,7 +146,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const clearError = () => setError(null);
 
   return (
-    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, login, register, logout, updateUser, loading, error, clearError }}>
+    <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, initializing, login, register, logout, updateUser, loading, error, clearError }}>
       {children}
     </AuthContext.Provider>
   );

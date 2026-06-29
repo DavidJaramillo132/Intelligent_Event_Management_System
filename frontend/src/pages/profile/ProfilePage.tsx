@@ -1,5 +1,6 @@
 import { useEffect, useState, type ChangeEvent, type FormEvent } from 'react';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { ApiError } from '../../api/client';
 import { profileApi, type UserProfile } from '../../api/profileApi';
 import FormField from '../../components/ui/FormField';
@@ -41,6 +42,7 @@ export default function ProfilePage() {
     document.title = "Mi Perfil de Usuario | EventosPro";
   }, []);
   const { updateUser } = useAuth();
+  const { showToast } = useToast();
   const [user, setUser] = useState<UserProfile | null>(null);
   
   const [profileForm, setProfileForm] = useState<ProfileForm>({
@@ -149,6 +151,7 @@ export default function ProfilePage() {
         setUser(response.data);
         updateUser(response.data as any);
         setProfileStatus('Tus datos han sido actualizados exitosamente.');
+        showToast({ type: 'success', title: 'Perfil actualizado', message: 'Tus datos personales se guardaron correctamente.' });
       }
     } catch (error) {
       if (error instanceof ApiError && error.field && error.field in profileForm) {
@@ -156,6 +159,7 @@ export default function ProfilePage() {
       } else {
         setProfileErrors({ general: getErrorMessage(error, 'No se pudo actualizar el perfil. Inténtalo de nuevo.') });
       }
+      showToast({ type: 'error', title: 'Error al actualizar', message: getErrorMessage(error, 'No se pudo actualizar el perfil.') });
     } finally {
       setSavingProfile(false);
       setPendingProfileData(null);
@@ -196,12 +200,14 @@ export default function ProfilePage() {
       await profileApi.cambiarContrasena(pendingPasswordData);
       setPasswordForm(emptyPasswordForm);
       setPasswordStatus('Tu contraseña ha sido cambiada exitosamente.');
+      showToast({ type: 'success', title: 'Contraseña actualizada', message: 'Tu contraseña se cambió correctamente.' });
     } catch (error) {
       if (error instanceof ApiError && error.field && error.field in passwordForm) {
         setPasswordErrors({ [error.field as PasswordField]: error.message });
       } else {
         setPasswordErrors({ general: getErrorMessage(error, 'No se pudo actualizar la contraseña. Verifica tu contraseña actual.') });
       }
+      showToast({ type: 'error', title: 'Error al cambiar contraseña', message: getErrorMessage(error, 'Verifica tu contraseña actual e inténtalo de nuevo.') });
     } finally {
       setSavingPassword(false);
       setPendingPasswordData(null);

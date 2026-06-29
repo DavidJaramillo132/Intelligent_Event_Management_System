@@ -96,17 +96,29 @@ export default function AccessibilityMenu() {
           {/* Font Size */}
           <div className="a11y-menu__group">
             <span className="a11y-menu__group-label" id="a11y-font-label">🔤 Tamaño de fuente</span>
-            <div className="a11y-menu__radio-group" role="radiogroup" aria-labelledby="a11y-font-label">
-              {(['normal', 'large', 'xlarge'] as const).map(size => (
-                <label key={size} className="a11y-menu__radio-label">
-                  <input
-                    type="radio"
-                    name="a11y-font"
-                    checked={prefs.fontSize === size}
-                    onChange={() => update({ fontSize: size })}
-                  />
-                  {size === 'normal' ? 'Normal' : size === 'large' ? 'Grande' : 'Extra grande'}
-                </label>
+            <div className="a11y-font-chips" role="radiogroup" aria-labelledby="a11y-font-label">
+              {([
+                { value: 'normal' as const, label: 'Normal' },
+                { value: 'large'  as const, label: 'Grande' },
+                { value: 'xlarge' as const, label: 'Extra'  },
+              ]).map(opt => (
+                <button
+                  key={opt.value}
+                  type="button"
+                  role="radio"
+                  aria-checked={prefs.fontSize === opt.value}
+                  className={`a11y-font-chip${prefs.fontSize === opt.value ? ' a11y-font-chip--active' : ''}`}
+                  onClick={() => update({ fontSize: opt.value })}
+                  aria-label={`Tamaño de fuente: ${opt.label}`}
+                >
+                  <span
+                    className="a11y-font-chip__letter"
+                    style={{ fontSize: opt.value === 'normal' ? '1rem' : opt.value === 'large' ? '1.2rem' : '1.45rem' }}
+                  >
+                    A
+                  </span>
+                  <span className="a11y-font-chip__desc">{opt.label}</span>
+                </button>
               ))}
             </div>
           </div>

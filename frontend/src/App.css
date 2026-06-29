@@ -274,3 +274,63 @@
   outline-offset: 2px;
   border-radius: 9999px;
 }
+
+/* ── Feature Cards — Íconos y títulos adaptativos (claro + oscuro) ─────── */
+
+/*
+  En modo claro: fondo violeta suave con opacidad visible,
+  ícono en violeta oscuro con buen contraste sobre fondo blanco.
+  En hover: fondo sólido violeta, ícono blanco.
+*/
+.feature-card__icon-wrap {
+  background-color: rgba(108, 58, 237, 0.12);
+  color: #5B21B6;
+}
+
+.feature-card:hover .feature-card__icon-wrap {
+  background-color: #6C3AED;
+  color: #ffffff;
+}
+
+.feature-card__title {
+  color: var(--color-text);
+}
+
+.feature-card:hover .feature-card__title {
+  color: #6C3AED;
+}
+
+/* Modo oscuro vía clase .dark-mode / .dark */
+:root.dark-mode .feature-card__icon-wrap,
+.dark .feature-card__icon-wrap {
+  background-color: rgba(139, 92, 246, 0.18);
+  color: #C4B5FD;
+}
+
+:root.dark-mode .feature-card:hover .feature-card__icon-wrap,
+.dark .feature-card:hover .feature-card__icon-wrap {
+  background-color: #7C3AED;
+  color: #ffffff;
+}
+
+:root.dark-mode .feature-card:hover .feature-card__title,
+.dark .feature-card:hover .feature-card__title {
+  color: #A78BFA;
+}
+
+/* Modo oscuro vía preferencia del sistema (cuando no hay clase .light-mode) */
+@media (prefers-color-scheme: dark) {
+  :root:not(.light-mode) .feature-card__icon-wrap {
+    background-color: rgba(139, 92, 246, 0.18);
+    color: #C4B5FD;
+  }
+
+  :root:not(.light-mode) .feature-card:hover .feature-card__icon-wrap {
+    background-color: #7C3AED;
+    color: #ffffff;
+  }
+
+  :root:not(.light-mode) .feature-card:hover .feature-card__title {
+    color: #A78BFA;
+  }
+}

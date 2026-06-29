@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import type { FormEvent } from 'react';
+import type { FormEvent, ChangeEvent } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
-import { api } from '../../api/client';
+import { useToast } from '../../context/ToastContext';
+import { api, apiRequest } from '../../api/client';
 import FormField from '../../components/ui/FormField';
 import FormFieldset from '../../components/ui/FormFieldset';
 import AlertMessage from '../../components/ui/AlertMessage';
@@ -159,6 +160,7 @@ export default function EventRegistrationPage() {
   const { eventoId } = useParams<{ eventoId: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [evento, setEvento] = useState<Evento | null>(null);
   const [disponibilidad, setDisponibilidad] = useState<Disponibilidad | null>(null);
@@ -170,7 +172,7 @@ export default function EventRegistrationPage() {
   const [showCapacityModal, setShowCapacityModal] = useState(false);
 
   const [step, setStep] = useState(1);
-  const TOTAL_STEPS = 4;
+  const TOTAL_STEPS = 5;
 
   const [form, setForm] = useState({
     nombre: user?.nombre ? `${user.nombre} ${user.apellido || ''}`.trim() : '',
@@ -181,6 +183,11 @@ export default function EventRegistrationPage() {
     a11y_notas: '',
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Estado de pago
+  const [comprobante, setComprobante] = useState<File | null>(null);
+  const [comprobantePreview, setComprobantePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     const loadData = async () => {
@@ -231,13 +238,43 @@ export default function EventRegistrationPage() {
     return Object.keys(e).length === 0;
   };
 
+  const validateStep4 = () => {
+    const selEntry = disponibilidad?.tipos_entrada.find(t => t.id === form.tipo_entrada_id);
+    const costo = selEntry ? selEntry.precio : (evento?.costo ?? 0);
+    if (costo > 0 && !comprobante) {
+      setErrors({ comprobante: 'Debe subir el comprobante de transferencia' });
+      return false;
+    }
+    setErrors({});
+    return true;
+  };
+
+  // Calcula si el evento tiene costo (determina si se muestra el paso de pago)
+  const tieneCosto = (() => {
+    const selEntry = disponibilidad?.tipos_entrada.find(t => t.id === form.tipo_entrada_id);
+    return selEntry ? selEntry.precio > 0 : (evento?.costo ?? 0) > 0;
+  })();
+
   const goNext = () => {
     if (step === 1 && !validateStep1()) return;
     if (step === 3 && !validateStep3()) return;
+    // Paso 4 = pago, solo si hay costo. Si no hay costo, saltar al paso 5
+    if (step === 3 && !tieneCosto) {
+      setStep(5);
+      return;
+    }
+    if (step === 4 && !validateStep4()) return;
     setStep(s => Math.min(s + 1, TOTAL_STEPS));
   };
 
-  const goPrev = () => setStep(s => Math.max(s - 1, 1));
+  const goPrev = () => {
+    // Si estamos en paso 5 y no hay costo, volver al paso 3 directamente
+    if (step === 5 && !tieneCosto) {
+      setStep(3);
+      return;
+    }
+    setStep(s => Math.max(s - 1, 1));
+  };
 
   const toggleA11y = (val: string) => {
     setForm(p => ({
@@ -246,6 +283,23 @@ export default function EventRegistrationPage() {
         ? p.a11y_seleccionadas.filter(v => v !== val)
         : [...p.a11y_seleccionadas, val],
     }));
+  };
+
+  const handleComprobanteChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] ?? null;
+    setComprobante(file);
+    if (file) {
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (ev) => setComprobantePreview(ev.target?.result as string);
+        reader.readAsDataURL(file);
+      } else {
+        setComprobantePreview(null);
+      }
+    } else {
+      setComprobantePreview(null);
+    }
+    setErrors(prev => ({ ...prev, comprobante: '' }));
   };
 
   const handleSubmit = async (ev: FormEvent) => {
@@ -259,21 +313,40 @@ export default function EventRegistrationPage() {
     ].filter(Boolean).join('; ');
 
     try {
-      const res = await api.post<InscripcionResponse>('/inscripciones', {
-        evento_id: eventoId,
-        asistente_id: user?.id,
-        tipo_entrada_id: form.tipo_entrada_id || undefined,
-        requerimientos_accesibilidad: reqs || undefined,
-      });
+      let res;
+      if (comprobante) {
+        // Enviar como multipart/form-data cuando hay comprobante
+        const formData = new FormData();
+        formData.append('evento_id', eventoId ?? '');
+        formData.append('asistente_id', user?.id ?? '');
+        if (form.tipo_entrada_id) formData.append('tipo_entrada_id', form.tipo_entrada_id);
+        if (reqs) formData.append('requerimientos_accesibilidad', reqs);
+        formData.append('comprobante', comprobante);
+        res = await apiRequest<InscripcionResponse>('/inscripciones', { method: 'POST', body: formData });
+      } else {
+        res = await api.post<InscripcionResponse>('/inscripciones', {
+          evento_id: eventoId,
+          asistente_id: user?.id,
+          tipo_entrada_id: form.tipo_entrada_id || undefined,
+          requerimientos_accesibilidad: reqs || undefined,
+        });
+      }
       setInscripcionId(res.data?.id ?? null);
       setSuccess(true);
       playSuccessSound();
+      showToast({
+        type: 'success',
+        title: '¡Inscripción exitosa!',
+        message: `Te has inscrito en "${evento?.titulo}". Revisa tu boleto digital.`,
+      });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al inscribirse';
       if (msg.toLowerCase().includes('aforo') || msg.toLowerCase().includes('cupo') || msg.includes('409') || msg.includes('capacity')) {
         setShowCapacityModal(true);
+        showToast({ type: 'warning', title: 'Sin cupos disponibles', message: 'El aforo del evento está completo.' });
       } else {
         setSubmitError(msg);
+        showToast({ type: 'error', title: 'Error al inscribirse', message: msg });
       }
     } finally {
       setSubmitting(false);
@@ -295,7 +368,12 @@ export default function EventRegistrationPage() {
     </main>
   );
 
-  const STEPS = ['Datos personales', 'Accesibilidad', 'Tipo de entrada', 'Revisión'];
+  const STEPS = tieneCosto
+    ? ['Datos personales', 'Accesibilidad', 'Tipo de entrada', 'Pago', 'Revisión']
+    : ['Datos personales', 'Accesibilidad', 'Tipo de entrada', 'Revisión'];
+
+  // Número de paso visual (cuando no hay costo, el paso 5 se muestra como paso 4)
+  const visibleStep = (!tieneCosto && step === 5) ? 4 : step;
 
   return (
     <main className="reg-page" id="main-content">
@@ -331,11 +409,11 @@ export default function EventRegistrationPage() {
           {STEPS.map((label, i) => (
             <div
               key={i}
-              className={`reg-steps__step ${step > i + 1 ? 'reg-steps__step--done' : ''} ${step === i + 1 ? 'reg-steps__step--active' : ''}`}
-              aria-current={step === i + 1 ? 'step' : undefined}
+              className={`reg-steps__step ${visibleStep > i + 1 ? 'reg-steps__step--done' : ''} ${visibleStep === i + 1 ? 'reg-steps__step--active' : ''}`}
+              aria-current={visibleStep === i + 1 ? 'step' : undefined}
             >
               <span className="reg-steps__number" aria-hidden="true">
-                {step > i + 1 ? '✓' : i + 1}
+                {visibleStep > i + 1 ? '✓' : i + 1}
               </span>
               <span className="reg-steps__label">{label}</span>
             </div>
@@ -554,10 +632,145 @@ export default function EventRegistrationPage() {
               </FormFieldset>
             )}
 
-            {/* ── PASO 4: Revisión ─────────────────────────────────────── */}
-            {step === 4 && (
+            {/* ── PASO 4: Pago por Transferencia ───────────────────────── */}
+            {step === 4 && tieneCosto && (
+              <FormFieldset legend={`Paso 4 de ${STEPS.length} — Pago por Transferencia`}>
+                {/* Instrucciones de transferencia */}
+                <div className="payment-info" role="region" aria-label="Datos bancarios para transferencia">
+                  <div className="payment-info__header">
+                    <span className="payment-info__bank-logo" aria-hidden="true">🏦</span>
+                    <div>
+                      <h3 className="payment-info__bank-name">Banco Pichincha</h3>
+                      <p className="payment-info__subtitle">Cuenta de Ahorros</p>
+                    </div>
+                  </div>
+
+                  <dl className="payment-info__data">
+                    <div className="payment-info__row">
+                      <dt>N.° de cuenta</dt>
+                      <dd>
+                        <span id="account-number" className="payment-info__account">
+                          2207845163
+                        </span>
+                        <button
+                          type="button"
+                          className="btn-copy"
+                          aria-label="Copiar número de cuenta"
+                          onClick={() => {
+                            navigator.clipboard.writeText('2207845163');
+                          }}
+                        >
+                          📋
+                        </button>
+                      </dd>
+                    </div>
+                    <div className="payment-info__row">
+                      <dt>Nombre del beneficiario</dt>
+                      <dd>EventosPro S.A.</dd>
+                    </div>
+                    <div className="payment-info__row">
+                      <dt>Cédula / RUC</dt>
+                      <dd>1792847361001</dd>
+                    </div>
+                    <div className="payment-info__row payment-info__row--total">
+                      <dt>Monto a transferir</dt>
+                      <dd className="payment-info__amount">
+                        ${(selectedEntry?.precio ?? evento?.costo ?? 0).toFixed(2)}
+                      </dd>
+                    </div>
+                  </dl>
+
+                  <p className="payment-info__note">
+                    <span aria-hidden="true">ℹ️</span> En el concepto de la transferencia escribe tu nombre completo y el nombre del evento.
+                  </p>
+                </div>
+
+                {/* Subida de comprobante */}
+                <div className="upload-area" style={{ marginTop: 'var(--space-5)' }}>
+                  <label htmlFor="comprobante-input" className="upload-label">
+                    <span style={{ fontWeight: 600, fontSize: 'var(--font-size-sm)' }}>
+                      Comprobante de transferencia <span aria-hidden="true" style={{ color: 'var(--color-error)' }}>*</span>
+                    </span>
+                    <span style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', display: 'block', marginTop: 'var(--space-1)' }}>
+                      Formatos aceptados: JPG, PNG, PDF. Tamaño máximo: 5 MB.
+                    </span>
+                  </label>
+
+                  <div
+                    className={`upload-dropzone ${comprobante ? 'upload-dropzone--filled' : ''}`}
+                    onClick={() => fileInputRef.current?.click()}
+                    onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); fileInputRef.current?.click(); } }}
+                    role="button"
+                    tabIndex={0}
+                    aria-label={comprobante ? `Archivo seleccionado: ${comprobante.name}. Haz clic para cambiar` : 'Haz clic para seleccionar el comprobante'}
+                    aria-describedby="comprobante-hint"
+                  >
+                    {comprobantePreview ? (
+                      <img
+                        src={comprobantePreview}
+                        alt="Vista previa del comprobante"
+                        className="upload-preview"
+                      />
+                    ) : comprobante ? (
+                      <div className="upload-file-info">
+                        <span aria-hidden="true" style={{ fontSize: '2rem' }}>📄</span>
+                        <p style={{ fontWeight: 600, margin: 0 }}>{comprobante.name}</p>
+                        <p style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', margin: 0 }}>
+                          {(comprobante.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="upload-placeholder">
+                        <span aria-hidden="true" style={{ fontSize: '2.5rem' }}>⬆️</span>
+                        <p style={{ margin: '0.5rem 0 0', fontWeight: 500 }}>Haz clic para subir o arrastra aquí</p>
+                        <p id="comprobante-hint" style={{ fontSize: 'var(--font-size-xs)', color: 'var(--color-text-muted)', margin: 0 }}>
+                          JPG, PNG o PDF — máx. 5 MB
+                        </p>
+                      </div>
+                    )}
+                  </div>
+
+                  <input
+                    ref={fileInputRef}
+                    id="comprobante-input"
+                    type="file"
+                    accept="image/jpeg,image/png,application/pdf"
+                    onChange={handleComprobanteChange}
+                    style={{ display: 'none' }}
+                    aria-hidden="true"
+                  />
+
+                  {comprobante && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost"
+                      style={{ marginTop: 'var(--space-2)', fontSize: 'var(--font-size-sm)' }}
+                      onClick={() => { setComprobante(null); setComprobantePreview(null); if (fileInputRef.current) fileInputRef.current.value = ''; }}
+                    >
+                      ✕ Eliminar archivo
+                    </button>
+                  )}
+
+                  {errors.comprobante && (
+                    <p role="alert" style={{ color: 'var(--color-error)', fontSize: 'var(--font-size-sm)', marginTop: 'var(--space-2)' }}>
+                      {errors.comprobante}
+                    </p>
+                  )}
+                </div>
+
+                <div className="reg-form__actions reg-form__actions--split">
+                  <button type="button" className="btn btn-ghost btn-lg" onClick={goPrev}>← Atrás</button>
+                  <button type="button" className="btn btn-primary btn-lg" onClick={goNext} id="btn-paso4">
+                    Continuar →
+                  </button>
+                </div>
+              </FormFieldset>
+            )}
+
+            {/* ── PASO 5 (o 4 si es gratis): Revisión ─────────────────── */}
+            {step === 5 && (
               <fieldset className="reg-confirm">
-                <legend>Paso 4 de 4 — Revisión y Confirmación</legend>
+                <legend>Paso {STEPS.length} de {STEPS.length} — Revisión y Confirmación</legend>
                 <div className="reg-confirm__summary">
                   <h3>Resumen de inscripción</h3>
                   <dl className="reg-confirm__details">
@@ -602,6 +815,14 @@ export default function EventRegistrationPage() {
                     {(!selectedEntry && evento.costo === 0) && (
                       <div className="reg-confirm__detail reg-confirm__detail--total">
                         <dt>Costo</dt><dd>Gratis</dd>
+                      </div>
+                    )}
+                    {comprobante && (
+                      <div className="reg-confirm__detail">
+                        <dt>Comprobante</dt>
+                        <dd style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                          <span aria-hidden="true">📎</span> {comprobante.name}
+                        </dd>
                       </div>
                     )}
                   </dl>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import { useToast } from '../../context/ToastContext';
 import { api } from '../../api/client';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import AlertMessage from '../../components/ui/AlertMessage';
@@ -139,6 +140,7 @@ export default function SurveyPage() {
   const { eventoId, inscripcionId } = useParams<{ eventoId: string; inscripcionId?: string }>();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const { showToast } = useToast();
 
   const [encuesta, setEncuesta] = useState<Encuesta | null>(null);
   const [loading, setLoading] = useState(true);
@@ -230,12 +232,15 @@ export default function SurveyPage() {
       localStorage.setItem(key, 'true');
 
       setSubmitted(true);
+      showToast({ type: 'success', title: '¡Encuesta enviada!', message: 'Gracias por tu opinión. Tu feedback nos ayuda a mejorar.' });
     } catch (err) {
       const msg = err instanceof Error ? err.message : 'Error al enviar la encuesta';
       if (msg.includes('409') || msg.toLowerCase().includes('ya has respondido') || msg.toLowerCase().includes('already')) {
         setAlreadySubmitted(true);
+        showToast({ type: 'info', title: 'Ya respondiste', message: 'Ya enviaste tus respuestas para este evento.' });
       } else {
         setSubmitError(msg);
+        showToast({ type: 'error', title: 'Error al enviar', message: msg });
       }
     } finally {
       setSubmitting(false);

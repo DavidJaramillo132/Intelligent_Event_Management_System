@@ -7,20 +7,21 @@ import (
 )
 
 type Inscripcion struct {
-	ID            uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"        json:"id"`
-	EventoID      uuid.UUID  `gorm:"type:uuid;not null;uniqueIndex:idx_evento_asistente"    json:"evento_id"`
-	AsistenteID   uuid.UUID  `gorm:"type:uuid;not null;uniqueIndex:idx_evento_asistente"    json:"asistente_id"`
+	ID                          uuid.UUID  `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"        json:"id"`
+	EventoID                    uuid.UUID  `gorm:"type:uuid;not null;uniqueIndex:idx_evento_asistente"    json:"evento_id"`
+	AsistenteID                 uuid.UUID  `gorm:"type:uuid;not null;uniqueIndex:idx_evento_asistente"    json:"asistente_id"`
 	TipoEntradaID               *uuid.UUID `gorm:"type:uuid"                                             json:"tipo_entrada_id,omitempty"`
 	RequerimientosAccesibilidad string     `gorm:"type:text"                                             json:"requerimientos_accesibilidad,omitempty"`
+	ComprobanteURL              string     `gorm:"type:varchar(500)"                                     json:"comprobante_url,omitempty"`
 	Estado                      string     `gorm:"type:varchar(40);not null;default:'inscrito'"           json:"estado"`
-	RegistradoEn  time.Time  `gorm:"autoCreateTime"                                         json:"registrado_en"`
-	ConfirmadoEn  *time.Time `gorm:"default:null"                                           json:"confirmado_en,omitempty"`
-	CanceladoEn   *time.Time `gorm:"default:null"                                           json:"cancelado_en,omitempty"`
+	RegistradoEn                time.Time  `gorm:"autoCreateTime"                                         json:"registrado_en"`
+	ConfirmadoEn                *time.Time `gorm:"default:null"                                           json:"confirmado_en,omitempty"`
+	CanceladoEn                 *time.Time `gorm:"default:null"                                           json:"cancelado_en,omitempty"`
 
 	// Relaciones
-	Evento    Evento   `gorm:"foreignKey:EventoID"    json:"evento,omitempty"`
-	Asistente Usuario  `gorm:"foreignKey:AsistenteID" json:"asistente,omitempty"`
-	Boleto    *Boleto  `gorm:"foreignKey:InscripcionID" json:"boleto,omitempty"`
+	Evento    Evento  `gorm:"foreignKey:EventoID"    json:"evento,omitempty"`
+	Asistente Usuario `gorm:"foreignKey:AsistenteID" json:"asistente,omitempty"`
+	Boleto    *Boleto `gorm:"foreignKey:InscripcionID" json:"boleto,omitempty"`
 }
 
 func (Inscripcion) TableName() string {

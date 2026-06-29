@@ -354,3 +354,176 @@
     width: 100%;
   }
 }
+
+/* ── Payment Info ─────────────────────────────────────────────────────── */
+.payment-info {
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  background: var(--color-primary-surface);
+}
+
+.payment-info__header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.payment-info__bank-logo {
+  font-size: 2rem;
+}
+
+.payment-info__bank-name {
+  font-size: var(--font-size-lg);
+  font-weight: 700;
+  color: var(--color-text);
+  margin: 0;
+}
+
+.payment-info__subtitle {
+  font-size: var(--font-size-sm);
+  color: var(--color-text-muted);
+  margin: 0;
+}
+
+.payment-info__data {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.payment-info__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+  font-size: var(--font-size-sm);
+}
+
+.payment-info__row:last-child {
+  border-bottom: none;
+}
+
+.payment-info__row dt {
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.payment-info__row dd {
+  font-weight: 600;
+  color: var(--color-text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.payment-info__account {
+  font-family: monospace;
+  font-size: var(--font-size-base);
+  letter-spacing: 0.05em;
+}
+
+.payment-info__row--total dt,
+.payment-info__row--total dd {
+  font-size: var(--font-size-lg);
+}
+
+.payment-info__amount {
+  color: var(--color-primary);
+  font-size: var(--font-size-xl) !important;
+  font-weight: 700;
+}
+
+.payment-info__note {
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  background: var(--color-warning-bg, #fef3c7);
+  border-left: 3px solid var(--color-warning, #f59e0b);
+  border-radius: var(--radius-sm);
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.btn-copy {
+  background: none;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  padding: 0.15rem 0.35rem;
+  cursor: pointer;
+  font-size: var(--font-size-sm);
+  transition: background var(--transition-fast);
+}
+
+.btn-copy:hover {
+  background: var(--color-surface-hover, var(--color-border));
+}
+
+/* ── File Upload ──────────────────────────────────────────────────────── */
+.upload-label {
+  display: block;
+  margin-bottom: var(--space-2);
+}
+
+.upload-dropzone {
+  border: 2px dashed var(--color-border-strong);
+  border-radius: var(--radius-lg);
+  padding: var(--space-8) var(--space-6);
+  text-align: center;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  background: var(--color-surface);
+  min-height: 9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.upload-dropzone:hover,
+.upload-dropzone:focus {
+  border-color: var(--color-primary);
+  background: var(--color-primary-surface);
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.upload-dropzone--filled {
+  border-style: solid;
+  border-color: var(--color-success-border, var(--color-primary));
+}
+
+.upload-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  color: var(--color-text-muted);
+}
+
+.upload-file-info {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.upload-preview {
+  max-height: 12rem;
+  max-width: 100%;
+  border-radius: var(--radius-md);
+  object-fit: contain;
+}
+
+@media (max-width: 640px) {
+  .payment-info__row {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-1);
+  }
+}

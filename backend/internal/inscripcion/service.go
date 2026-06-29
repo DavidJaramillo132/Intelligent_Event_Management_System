@@ -44,6 +44,7 @@ func (s *Service) Crear(input CrearInscripcionInput) (*InscripcionResponse, erro
 		EventoID:                    eventoUUID,
 		AsistenteID:                 asistenteUUID,
 		RequerimientosAccesibilidad: input.RequerimientosAccesibilidad,
+		ComprobanteURL:              input.ComprobanteURL,
 		Estado:                      "inscrito",
 	}
 

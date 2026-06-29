@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, Link, useLocation, useNavigate } from 'react-router-dom';
-import { AuthProvider, useAuth } from './context/AuthContext'; 
+import { AuthProvider, useAuth } from './context/AuthContext';
+import { ToastProvider } from './context/ToastContext';
+import ToastContainer from './components/ui/ToastContainer'; 
 import {
   Search,
   Target,
@@ -18,6 +20,7 @@ import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import AccessibilityMenu from './components/ui/AccessibilityMenu';
 import AccessibleTooltip from './components/ui/AccessibleTooltip';
+import KeyboardShortcuts from './components/ui/KeyboardShortcuts';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import CreateEventPage from './pages/events/CreateEventPage';
@@ -82,7 +85,8 @@ function formatDate(iso: string) {
 }
 
 function ProtectedRoute({ children, roles }: { children: React.ReactNode; roles?: string[] }) {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated, user, initializing } = useAuth();
+  if (initializing) return null; // espera a que termine la hidratación
   if (!isAuthenticated) return <Navigate to="/login" replace />;
   if (roles && user && !roles.includes(user.rol)) return <Navigate to="/" replace />;
   return <>{children}</>;
@@ -315,12 +319,12 @@ function HomePage() {
               ].map((feat, i) => (
                 <div 
                   key={i} 
-                  className="group rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card)]"
+                  className="feature-card group rounded-2xl border border-border bg-card p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card)]"
                 >
-                  <div className="grid h-12 w-12 place-items-center rounded-xl bg-[oklch(0.52_0.25_285)]/10 text-[oklch(0.52_0.25_285)] dark:bg-indigo-950/50 dark:text-indigo-400 transition-colors duration-300 group-hover:bg-[oklch(0.52_0.25_285)] group-hover:text-white dark:group-hover:bg-indigo-600 dark:group-hover:text-white">
+                  <div className="feature-card__icon-wrap grid h-12 w-12 place-items-center rounded-xl transition-colors duration-300">
                     <feat.icon className="h-6 w-6" />
                   </div>
-                  <h3 className="mt-5 text-lg font-semibold text-foreground transition-colors group-hover:text-[oklch(0.52_0.25_285)] dark:group-hover:text-indigo-400">
+                  <h3 className="feature-card__title mt-5 text-lg font-semibold transition-colors">
                     {feat.title}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
@@ -364,7 +368,7 @@ function HomePage() {
                   { icon: Accessibility, t: "Enfoque inclusivo", d: "Desarrollo con conciencia de usabilidad en cada interacción." },
                 ].map((item, index) => (
                   <li key={index} className="flex gap-4">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[oklch(0.52_0.25_285)]/10 text-[oklch(0.52_0.25_285)] dark:text-indigo-400">
+                    <span className="feature-card__icon-wrap grid h-10 w-10 shrink-0 place-items-center rounded-lg">
                       <item.icon className="h-5 w-5" />
                     </span>
                     <div>
@@ -463,7 +467,7 @@ function HomePage() {
 
                 <ul className="mt-8 space-y-4">
                   <li className="flex gap-4">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[oklch(0.52_0.25_285)]/10 text-[oklch(0.52_0.25_285)] dark:text-indigo-400 text-lg font-bold">
+                    <span className="feature-card__icon-wrap grid h-10 w-10 shrink-0 place-items-center rounded-lg text-lg font-bold">
                       +
                     </span>
                     <div>
@@ -472,7 +476,7 @@ function HomePage() {
                     </div>
                   </li>
                   <li className="flex gap-4">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[oklch(0.52_0.25_285)]/10 text-[oklch(0.52_0.25_285)] dark:text-indigo-400 text-lg">
+                    <span className="feature-card__icon-wrap grid h-10 w-10 shrink-0 place-items-center rounded-lg text-lg">
                       ✓
                     </span>
                     <div>
@@ -481,7 +485,7 @@ function HomePage() {
                     </div>
                   </li>
                   <li className="flex gap-4">
-                    <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[oklch(0.52_0.25_285)]/10 text-[oklch(0.52_0.25_285)] dark:text-indigo-400 text-lg">
+                    <span className="feature-card__icon-wrap grid h-10 w-10 shrink-0 place-items-center rounded-lg text-lg">
                       🎟
                     </span>
                     <div>
@@ -646,61 +650,59 @@ function HomePage() {
         </section>
 
         {/* ── SECCIÓN CONTACTO DIRECTO ─────────────────────────────────── */}
-        <section id="contacto" className="border-t border-border/60 bg-background py-24 transition-colors duration-200">
-          <div className="mx-auto max-w-7xl px-6">
-            <div className="grid gap-12 lg:grid-cols-3">
-              <div className="lg:col-span-1">
-                <p className="text-sm font-medium uppercase tracking-wider text-[oklch(0.52_0.25_285)] dark:text-indigo-400">Canales de Atención</p>
-                <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground">
-                  Contáctanos
-                </h2>
-                <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
-                  ¿Tienes dudas sobre cómo implementar la gestión de tus eventos corporativos o masivos? Nuestro equipo técnico está listo para darte soporte.
-                </p>
+        <section id="contacto" className="border-t border-border/60 bg-background py-10 transition-colors duration-200">
+          <div className="mx-auto max-w-5xl px-6">
+            <div className="flex flex-wrap items-center gap-8">
 
-                <div className="flex gap-4 mt-6">
-                  <a 
-                    href="https://facebook.com" 
-                    target="_blank" 
+              {/* Texto + redes */}
+              <div className="min-w-[13rem] flex-1">
+                <p className="text-xs font-medium uppercase tracking-wider text-[oklch(0.52_0.25_285)] dark:text-indigo-400">Canales de Atención</p>
+                <h2 className="mt-1 text-2xl font-bold tracking-tight text-foreground">Contáctanos</h2>
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground max-w-xs">
+                  ¿Tienes dudas? Nuestro equipo técnico está listo para ayudarte.
+                </p>
+                <div className="flex gap-3 mt-4">
+                  <a
+                    href="https://facebook.com"
+                    target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Visitar nuestro perfil oficial de Facebook"
                     className="text-muted-foreground hover:text-blue-600 dark:hover:text-blue-400 transition-colors p-2 bg-muted/40 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-xl border border-border/40"
                   >
-                    <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/></svg>
                     <span className="sr-only">Facebook</span>
                   </a>
-
-                  <a 
-                    href="https://instagram.com" 
-                    target="_blank" 
+                  <a
+                    href="https://instagram.com"
+                    target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Visitar nuestro perfil oficial de Instagram"
                     className="text-muted-foreground hover:text-pink-600 dark:hover:text-pink-400 transition-colors p-2 bg-muted/40 hover:bg-pink-50 dark:hover:bg-pink-950/30 rounded-xl border border-border/40"
                   >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg>
                     <span className="sr-only">Instagram</span>
                   </a>
                 </div>
               </div>
 
-              <div className="lg:col-span-2 grid gap-6 sm:grid-cols-2">
-                <div className="rounded-2xl border border-border bg-muted/20 p-6 flex gap-4">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[oklch(0.52_0.25_285)]/10 text-[oklch(0.52_0.25_285)] dark:text-indigo-400">
-                    <Mail className="h-5 w-5" />
+              {/* Cards de contacto */}
+              <div className="flex flex-wrap gap-3">
+                <div className="rounded-xl border border-border bg-muted/20 px-4 py-3 flex gap-3 items-center">
+                  <span className="feature-card__icon-wrap grid h-9 w-9 shrink-0 place-items-center rounded-lg">
+                    <Mail className="h-4 w-4" />
                   </span>
                   <div>
-                    <h4 className="font-semibold text-foreground">Correo Electrónico</h4>
-                    <p className="mt-1 text-sm text-muted-foreground">soporte@eventmanagement.internal</p>
+                    <p className="text-xs font-semibold text-foreground">Correo Electrónico</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">soporte@eventmanagement.internal</p>
                   </div>
                 </div>
-
-                <div className="rounded-2xl border border-border bg-muted/20 p-6 flex gap-4">
-                  <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-[oklch(0.52_0.25_285)]/10 text-[oklch(0.52_0.25_285)] dark:text-indigo-400">
-                    <Phone className="h-5 w-5" />
+                <div className="rounded-xl border border-border bg-muted/20 px-4 py-3 flex gap-3 items-center">
+                  <span className="feature-card__icon-wrap grid h-9 w-9 shrink-0 place-items-center rounded-lg">
+                    <Phone className="h-4 w-4" />
                   </span>
                   <div>
-                    <h4 className="font-semibold text-foreground">Atención Telefónica</h4>
-                    <p className="mt-1 text-sm text-muted-foreground">+593 5 2123 456</p>
+                    <p className="text-xs font-semibold text-foreground">Atención Telefónica</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">+593 5 2123 456</p>
                   </div>
                 </div>
               </div>
@@ -716,15 +718,16 @@ function HomePage() {
 export default function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <a 
-          href="#main-content" 
-          className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:bg-indigo-600 focus:text-white focus:px-4 focus:py-2.5 focus:rounded-xl focus:font-semibold focus:shadow-lg focus:z-[9999] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
-        >
-          Saltar al contenido principal
-        </a>
+      <ToastProvider>
+        <BrowserRouter>
+          <a 
+            href="#main-content" 
+            className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:bg-indigo-600 focus:text-white focus:px-4 focus:py-2.5 focus:rounded-xl focus:font-semibold focus:shadow-lg focus:z-[9999] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 transition-all"
+          >
+            Saltar al contenido principal
+          </a>
 
-        <Header />
+          <Header />
         
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -801,7 +804,10 @@ export default function App() {
 
         <Footer />
         <AccessibilityMenu />
+        <KeyboardShortcuts />
+        <ToastContainer />
       </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }
