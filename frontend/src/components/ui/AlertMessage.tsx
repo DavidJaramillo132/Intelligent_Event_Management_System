@@ -1,3 +1,4 @@
+import AccessibleTooltip from './AccessibleTooltip';
 import './AlertMessage.css';
 
 type AlertType = 'success' | 'error' | 'warning' | 'info' | 'loading';
@@ -22,9 +23,11 @@ export default function AlertMessage({ type, message, onClose }: AlertMessagePro
       <span className="alert__icon" aria-hidden="true">{icons[type]}</span>
       <p className="alert__message">{message}</p>
       {onClose && (
-        <button className="alert__close" onClick={onClose} aria-label="Cerrar alerta" type="button">
-          ✕
-        </button>
+        <AccessibleTooltip content="Cerrar alerta">
+          <button className="alert__close" onClick={onClose} aria-label="Cerrar alerta" type="button">
+            ✕
+          </button>
+        </AccessibleTooltip>
       )}
     </div>
   );

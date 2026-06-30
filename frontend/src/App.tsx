@@ -601,13 +601,15 @@ function HomePage() {
                     {eventosReales.length > 1 && (
                       <>
                         <div className="flex items-center justify-center gap-4 mt-6" role="toolbar" aria-label="Controles del carrusel">
-                          <button
-                            onClick={prevSlide}
-                            className="carousel-btn"
-                            aria-label="Evento anterior"
-                          >
-                            ←
-                          </button>
+                          <AccessibleTooltip content="Evento anterior">
+                            <button
+                              onClick={prevSlide}
+                              className="carousel-btn"
+                              aria-label="Evento anterior"
+                            >
+                              ←
+                            </button>
+                          </AccessibleTooltip>
                           <AccessibleTooltip content={userPaused ? 'Reanudar' : 'Pausar'}>
                             <button
                               onClick={togglePause}
@@ -618,13 +620,15 @@ function HomePage() {
                               {userPaused ? '▶' : '⏸'}
                             </button>
                           </AccessibleTooltip>
-                          <button
-                            onClick={nextSlide}
-                            className="carousel-btn"
-                            aria-label="Siguiente evento"
-                          >
-                            →
-                          </button>
+                          <AccessibleTooltip content="Siguiente evento">
+                            <button
+                              onClick={nextSlide}
+                              className="carousel-btn"
+                              aria-label="Siguiente evento"
+                            >
+                              →
+                            </button>
+                          </AccessibleTooltip>
                         </div>
 
                         <div className="flex items-center justify-center gap-2 mt-3" role="tablist" aria-label="Seleccionar evento">

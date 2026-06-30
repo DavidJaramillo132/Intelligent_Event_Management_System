@@ -354,13 +354,15 @@ export default function EventDiscoveryPage() {
                 autoComplete="off"
                 aria-label="Buscar eventos por nombre o descripción"
               />
-              <button
-                type="submit"
-                className="search-bar__btn"
-                aria-label="Buscar"
-              >
-                🔍
-              </button>
+              <AccessibleTooltip content="Buscar eventos">
+                <button
+                  type="submit"
+                  className="search-bar__btn"
+                  aria-label="Buscar"
+                >
+                  🔍
+                </button>
+              </AccessibleTooltip>
             </form>
           </div>
         </div>

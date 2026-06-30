@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { useToast, type Toast } from '../../context/ToastContext';
+import AccessibleTooltip from './AccessibleTooltip';
 import './ToastContainer.css';
 
 const ICONS: Record<Toast['type'], string> = {
@@ -41,14 +42,16 @@ function ToastItem({ toast, onDismiss }: { toast: Toast; onDismiss: () => void }
         {toast.message && <p className="toast__message">{toast.message}</p>}
       </div>
 
-      <button
-        type="button"
-        className="toast__close"
-        onClick={onDismiss}
-        aria-label={`Cerrar notificación: ${toast.title}`}
-      >
-        ✕
-      </button>
+      <AccessibleTooltip content={`Cerrar notificación: ${toast.title}`}>
+        <button
+          type="button"
+          className="toast__close"
+          onClick={onDismiss}
+          aria-label={`Cerrar notificación: ${toast.title}`}
+        >
+          ✕
+        </button>
+      </AccessibleTooltip>
 
       {/* Barra de progreso visual (decorativa) */}
       {toast.duration && toast.duration > 0 && (

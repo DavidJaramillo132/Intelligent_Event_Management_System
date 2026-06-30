@@ -9,6 +9,7 @@ import FormFieldset from '../../components/ui/FormFieldset';
 import AlertMessage from '../../components/ui/AlertMessage';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { validateRequired, validateEmail } from '../../utils/validators';
+import AccessibleTooltip from '../../components/ui/AccessibleTooltip';
 import '../attendee/attendee.css';
 import './registration.css';
 
@@ -652,16 +653,18 @@ export default function EventRegistrationPage() {
                         <span id="account-number" className="payment-info__account">
                           2207845163
                         </span>
-                        <button
-                          type="button"
-                          className="btn-copy"
-                          aria-label="Copiar número de cuenta"
-                          onClick={() => {
-                            navigator.clipboard.writeText('2207845163');
-                          }}
-                        >
-                          📋
-                        </button>
+                        <AccessibleTooltip content="Copiar número de cuenta">
+                          <button
+                            type="button"
+                            className="btn-copy"
+                            aria-label="Copiar número de cuenta"
+                            onClick={() => {
+                              navigator.clipboard.writeText('2207845163');
+                            }}
+                          >
+                            📋
+                          </button>
+                        </AccessibleTooltip>
                       </dd>
                     </div>
                     <div className="payment-info__row">

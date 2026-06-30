@@ -3,6 +3,7 @@ import { useAuth } from '../../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import AlertMessage from '../../components/ui/AlertMessage';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
+import AccessibleTooltip from '../../components/ui/AccessibleTooltip';
 import { adminApi, type UsuarioAdmin } from '../../api/adminApi';
 import './GestionUsuarios.css';
 
@@ -430,15 +431,17 @@ export default function GestionUsuariosPage() {
         {/* Paginación */}
         {!loading && totalPaginas > 1 && (
           <nav className="admin-pagination" aria-label="Paginación de usuarios">
-            <button
-              type="button"
-              className="admin-pagination__btn"
-              onClick={() => irAPagina(paginacion.pagina - 1)}
-              disabled={paginacion.pagina <= 1}
-              aria-label="Página anterior"
-            >
-              ‹
-            </button>
+            <AccessibleTooltip content="Página anterior">
+              <button
+                type="button"
+                className="admin-pagination__btn"
+                onClick={() => irAPagina(paginacion.pagina - 1)}
+                disabled={paginacion.pagina <= 1}
+                aria-label="Página anterior"
+              >
+                ‹
+              </button>
+            </AccessibleTooltip>
             {Array.from({ length: totalPaginas }, (_, i) => i + 1)
               .filter(p => p === 1 || p === totalPaginas || Math.abs(p - paginacion.pagina) <= 2)
               .reduce<(number | 'ellipsis')[]>((acc, p, idx, arr) => {
@@ -462,15 +465,17 @@ export default function GestionUsuariosPage() {
                   </button>
                 )
               )}
-            <button
-              type="button"
-              className="admin-pagination__btn"
-              onClick={() => irAPagina(paginacion.pagina + 1)}
-              disabled={paginacion.pagina >= totalPaginas}
-              aria-label="Página siguiente"
-            >
-              ›
-            </button>
+            <AccessibleTooltip content="Página siguiente">
+              <button
+                type="button"
+                className="admin-pagination__btn"
+                onClick={() => irAPagina(paginacion.pagina + 1)}
+                disabled={paginacion.pagina >= totalPaginas}
+                aria-label="Página siguiente"
+              >
+                ›
+              </button>
+            </AccessibleTooltip>
           </nav>
         )}
       </div>

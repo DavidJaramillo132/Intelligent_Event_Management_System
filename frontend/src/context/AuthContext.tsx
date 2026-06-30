@@ -1,5 +1,7 @@
-import { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
+import { createContext, useContext, useState, useEffect, useCallback, type ReactNode } from 'react';
 import { api } from '../api/client';
+import { startSessionTimer, stopSessionTimer, extendSession } from '../utils/sessionTimer';
+import SessionExpiryModal from '../components/ui/SessionExpiryModal';
 
 export interface User {
   id: string;
@@ -64,16 +66,15 @@ function readStoredAuth(): { user: User | null; token: string | null } {
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Inicialización lazy síncrona: evita el gap de null → estado real al refrescar
   const [user, setUser] = useState<User | null>(() => readStoredAuth().user);
   const [token, setToken] = useState<string | null>(() => readStoredAuth().token);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  
-  // initializing siempre false porque la hidratación es síncrona en el constructor del state
+  const [showExpiryModal, setShowExpiryModal] = useState(false);
+  const [countdownSeconds, setCountdownSeconds] = useState(60);
+
   const initializing = false;
 
-  // Sincroniza en caso de cambios en otra pestaña
   useEffect(() => {
     const handleStorage = (e: StorageEvent) => {
       if (e.key !== 'auth') return;
@@ -83,6 +84,63 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
     window.addEventListener('storage', handleStorage);
     return () => window.removeEventListener('storage', handleStorage);
+  }, []);
+
+  const isSessionTimeoutEnabled = useCallback(() => {
+    const raw = localStorage.getItem('a11y-prefs');
+    const prefs = raw ? JSON.parse(raw) : {};
+    return prefs.noSessionTimeout !== true;
+  }, []);
+
+  // Session timer: starts/stops on auth state and a11y preference changes
+  useEffect(() => {
+    if (!token) {
+      stopSessionTimer();
+      setShowExpiryModal(false);
+      return;
+    }
+
+    const sync = () => {
+      if (isSessionTimeoutEnabled()) {
+        startSessionTimer({
+          onWarning: () => {
+            setShowExpiryModal(true);
+            setCountdownSeconds(60);
+          },
+          onExpire: () => {
+            setShowExpiryModal(false);
+            logout();
+          },
+        }, 1);
+      } else {
+        stopSessionTimer();
+        setShowExpiryModal(false);
+      }
+    };
+
+    sync();
+    window.addEventListener('a11y-prefs-changed', sync);
+    return () => {
+      window.removeEventListener('a11y-prefs-changed', sync);
+      stopSessionTimer();
+    };
+  }, [token]);
+
+  // Countdown tick when modal is open
+  useEffect(() => {
+    if (!showExpiryModal) return;
+    const iv = setInterval(() => {
+      setCountdownSeconds(s => {
+        if (s <= 1) return 0;
+        return s - 1;
+      });
+    }, 1000);
+    return () => clearInterval(iv);
+  }, [showExpiryModal]);
+
+  const handleExtendSession = useCallback(() => {
+    setShowExpiryModal(false);
+    extendSession();
   }, []);
 
   const login = async (correo: string, contrasena: string) => {
@@ -125,6 +183,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   const logout = () => {
+    stopSessionTimer();
+    setShowExpiryModal(false);
     localStorage.removeItem('auth');
     setUser(null);
     setToken(null);
@@ -148,6 +208,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   return (
     <AuthContext.Provider value={{ user, token, isAuthenticated: !!token, initializing, login, register, logout, updateUser, loading, error, clearError }}>
       {children}
+      {showExpiryModal && (
+        <SessionExpiryModal
+          secondsRemaining={countdownSeconds}
+          onExtend={handleExtendSession}
+          onLogout={logout}
+        />
+      )}
     </AuthContext.Provider>
   );
 }

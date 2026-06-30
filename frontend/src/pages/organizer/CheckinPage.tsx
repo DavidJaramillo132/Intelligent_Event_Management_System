@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useParams } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import { organizerApi, type EventoStats } from '../../api/organizerApi';
+import AccessibleTooltip from '../../components/ui/AccessibleTooltip';
 import './organizer.css';
 
 type FeedbackState = 'idle' | 'success' | 'error' | 'duplicate';
@@ -242,9 +243,11 @@ export default function CheckinPage() {
                 aria-label="Código de inscripción manual"
                 disabled={processing}
               />
-              <button type="submit" className="btn btn-primary" disabled={processing || !manualCode.trim()} id="btn-manual-checkin">
-                ✓
-              </button>
+              <AccessibleTooltip content="Confirmar check-in">
+                <button type="submit" className="btn btn-primary" disabled={processing || !manualCode.trim()} id="btn-manual-checkin" aria-label="Confirmar check-in manual">
+                  ✓
+                </button>
+              </AccessibleTooltip>
             </div>
           </form>
         </section>

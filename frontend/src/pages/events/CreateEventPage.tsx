@@ -7,6 +7,7 @@ import FormFieldset from '../../components/ui/FormFieldset';
 import AlertMessage from '../../components/ui/AlertMessage';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { validateRequired, validateNumber } from '../../utils/validators';
+import AccessibleTooltip from '../../components/ui/AccessibleTooltip';
 import '../organizer/organizer.css';
 import './events.css';
 
@@ -366,9 +367,11 @@ export default function CreateEventPage() {
                         </td>
                         <td>
                           {tiposEntrada.length > 1 && (
-                            <button type="button" className="btn btn-danger btn-sm"
-                              onClick={() => setTiposEntrada(p => p.filter((_, j) => j !== i))}
-                              aria-label={`Eliminar tipo de entrada ${te.nombre || i + 1}`}>✕</button>
+                            <AccessibleTooltip content="Eliminar tipo de entrada">
+                              <button type="button" className="btn btn-danger btn-sm"
+                                onClick={() => setTiposEntrada(p => p.filter((_, j) => j !== i))}
+                                aria-label={`Eliminar tipo de entrada ${te.nombre || i + 1}`}>✕</button>
+                            </AccessibleTooltip>
                           )}
                         </td>
                       </tr>
@@ -424,9 +427,11 @@ export default function CreateEventPage() {
                           id={`ses-fin-${i}`} />
                       </td>
                       <td>
-                        <button type="button" className="btn btn-danger btn-sm"
-                          onClick={() => setSesiones(p => p.filter((_, j) => j !== i))}
-                          aria-label={`Eliminar sesión ${s.titulo || i + 1}`}>✕</button>
+                        <AccessibleTooltip content="Eliminar sesión">
+                          <button type="button" className="btn btn-danger btn-sm"
+                            onClick={() => setSesiones(p => p.filter((_, j) => j !== i))}
+                            aria-label={`Eliminar sesión ${s.titulo || i + 1}`}>✕</button>
+                        </AccessibleTooltip>
                       </td>
                     </tr>
                   ))}
@@ -489,9 +494,11 @@ export default function CreateEventPage() {
                           id={`mat-notas-${i}`} />
                       </td>
                       <td>
-                        <button type="button" className="btn btn-danger btn-sm"
-                          onClick={() => setMateriales(p => p.filter((_, j) => j !== i))}
-                          aria-label={`Eliminar material ${m.nombre || i + 1}`}>✕</button>
+                        <AccessibleTooltip content="Eliminar material">
+                          <button type="button" className="btn btn-danger btn-sm"
+                            onClick={() => setMateriales(p => p.filter((_, j) => j !== i))}
+                            aria-label={`Eliminar material ${m.nombre || i + 1}`}>✕</button>
+                        </AccessibleTooltip>
                       </td>
                     </tr>
                   ))}

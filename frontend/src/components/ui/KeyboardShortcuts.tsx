@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
+import AccessibleTooltip from './AccessibleTooltip';
 import './KeyboardShortcuts.css';
 
 interface Shortcut {
@@ -135,6 +136,13 @@ export default function KeyboardShortcuts() {
     };
   }, [open, shortcuts, close]);
 
+  // Abrir desde evento personalizado (ej. botón en menú de accesibilidad)
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener('open-keyboard-shortcuts', handler);
+    return () => window.removeEventListener('open-keyboard-shortcuts', handler);
+  }, []);
+
   // Trampa de foco cuando el panel está abierto
   useEffect(() => {
     if (open) {
@@ -177,14 +185,16 @@ export default function KeyboardShortcuts() {
               <p className="ks-subtitle">Navega más rápido sin usar el ratón</p>
             </div>
           </div>
-          <button
-            type="button"
-            className="ks-close"
-            onClick={close}
-            aria-label="Cerrar guía de atajos"
-          >
-            ✕
-          </button>
+          <AccessibleTooltip content="Cerrar guía de atajos">
+            <button
+              type="button"
+              className="ks-close"
+              onClick={close}
+              aria-label="Cerrar guía de atajos"
+            >
+              ✕
+            </button>
+          </AccessibleTooltip>
         </div>
 
         {/* Tip */}

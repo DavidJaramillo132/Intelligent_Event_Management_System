@@ -281,15 +281,17 @@ export default function AuditoriaPage() {
         {/* Paginación numerada accesible */}
         {!loading && totalPaginas > 1 && (
           <nav className="admin-pagination" aria-label="Paginación de logs de auditoría">
-            <button
-              type="button"
-              className="admin-pagination__btn"
-              onClick={() => irAPagina(paginacion.pagina - 1)}
-              disabled={paginacion.pagina <= 1}
-              aria-label="Página anterior"
-            >
-              ‹
-            </button>
+            <AccessibleTooltip content="Página anterior">
+              <button
+                type="button"
+                className="admin-pagination__btn"
+                onClick={() => irAPagina(paginacion.pagina - 1)}
+                disabled={paginacion.pagina <= 1}
+                aria-label="Página anterior"
+              >
+                ‹
+              </button>
+            </AccessibleTooltip>
             {Array.from({ length: totalPaginas }, (_, i) => i + 1)
               .filter(p => p === 1 || p === totalPaginas || Math.abs(p - paginacion.pagina) <= 2)
               .reduce<(number | 'ellipsis')[]>((acc, p, idx, arr) => {
@@ -313,15 +315,17 @@ export default function AuditoriaPage() {
                   </button>
                 )
               )}
-            <button
-              type="button"
-              className="admin-pagination__btn"
-              onClick={() => irAPagina(paginacion.pagina + 1)}
-              disabled={paginacion.pagina >= totalPaginas}
-              aria-label="Página siguiente"
-            >
-              ›
-            </button>
+            <AccessibleTooltip content="Página siguiente">
+              <button
+                type="button"
+                className="admin-pagination__btn"
+                onClick={() => irAPagina(paginacion.pagina + 1)}
+                disabled={paginacion.pagina >= totalPaginas}
+                aria-label="Página siguiente"
+              >
+                ›
+              </button>
+            </AccessibleTooltip>
           </nav>
         )}
 
