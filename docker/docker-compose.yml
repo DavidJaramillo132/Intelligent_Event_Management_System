@@ -158,6 +158,8 @@ services:
     image: frontend:latest
     container_name: eventos_frontend
     restart: unless-stopped
+    volumes:
+      - ../frontend/public/videos:/usr/share/nginx/html/videos:ro
     ports:
       - "127.0.0.1:5174:80"  # Bind to localhost; expose via Nginx in production
     depends_on:

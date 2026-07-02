@@ -10,8 +10,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies with optimizations
-RUN npm ci --only=production && \
-    npm install --only=development
+RUN npm ci
 
 # Copy source code
 COPY . .

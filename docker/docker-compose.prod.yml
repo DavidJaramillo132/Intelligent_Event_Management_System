@@ -42,6 +42,8 @@ services:
 
   frontend:
     restart: always
+    volumes:
+      - ../frontend/public/videos:/usr/share/nginx/html/videos:ro
     deploy:
       resources:
         limits:
