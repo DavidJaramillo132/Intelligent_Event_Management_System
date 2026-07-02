@@ -8,6 +8,7 @@ import AlertMessage from '../../components/ui/AlertMessage';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import { validateRequired, validateNumber } from '../../utils/validators';
 import AccessibleTooltip from '../../components/ui/AccessibleTooltip';
+import HelpVideoModal from '../../components/ui/HelpVideoModal';
 import '../organizer/organizer.css';
 import './events.css';
 
@@ -33,6 +34,7 @@ export default function CreateEventPage() {
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<string | null>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   const [tiposEvento, setTiposEvento] = useState<TipoEvento[]>([]);
   const [lugares, setLugares] = useState<Lugar[]>([]);
@@ -207,6 +209,17 @@ export default function CreateEventPage() {
         <div className="container stepper-statusbar__inner">
           <span className="stepper-statusbar__title">
             {eventoId ? '✎ Editar evento' : '＋ Nuevo evento'}
+            <AccessibleTooltip content="Ver tutorial">
+              <button
+                type="button"
+                className="btn-help-video btn-help-video--sm"
+                onClick={() => setShowHelp(true)}
+                aria-label="Ver tutorial de creación de eventos"
+                style={{ marginLeft: '0.5rem' }}
+              >
+                ❓
+              </button>
+            </AccessibleTooltip>
             {form.titulo && <span style={{ fontWeight: 400, color: 'var(--color-text-muted)', marginLeft: '0.5rem' }}>— {form.titulo}</span>}
           </span>
           <div className="stepper-statusbar__right">
@@ -530,6 +543,23 @@ export default function CreateEventPage() {
           </div>
         </div>
       </form>
+      {showHelp && (
+        <HelpVideoModal
+          videoSrc="/videos/CrearEvento.mp4"
+          videoVtt="/videos/CrearEvento.vtt"
+          title="Crear un Evento"
+          description="Un video donde se muestra cómo crear un evento para que el usuario organizador sepa cómo hacerlo."
+          transcription={
+            <>
+              <p><strong className="text-foreground">0:00</strong> Aquí en crear evento podemos configurar el tipo de evento, la frecuencia, el título, la descripción, el costo, el aforo máximo y una imagen destacada.</p>
+              <p><strong className="text-foreground">0:18</strong> En la ubicación y fecha, asignamos la fecha y el lugar donde se realizará el evento.</p>
+              <p><strong className="text-foreground">0:36</strong> Configuramos los lugares disponibles, el tipo de entrada, la cantidad de entradas, los ponentes y la fecha de finalización.</p>
+              <p><strong className="text-foreground">1:02</strong> Y así se crea un nuevo evento.</p>
+            </>
+          }
+          onClose={() => setShowHelp(false)}
+        />
+      )}
     </div>
   );
 }

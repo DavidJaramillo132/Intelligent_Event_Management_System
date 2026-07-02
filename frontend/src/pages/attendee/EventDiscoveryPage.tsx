@@ -4,6 +4,7 @@ import { apiRequest } from '../../api/client';
 import LoadingSpinner from '../../components/ui/LoadingSpinner';
 import AlertMessage from '../../components/ui/AlertMessage';
 import AccessibleTooltip from '../../components/ui/AccessibleTooltip';
+import HelpVideoModal from '../../components/ui/HelpVideoModal';
 import { detectLanguage } from '../../utils/language';
 import './attendee.css';
 import evCyber from '../../assets/ev-cyber.jpg';
@@ -250,6 +251,7 @@ export default function EventDiscoveryPage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const searchInputRef = useRef<HTMLInputElement>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
+  const [showHelp, setShowHelp] = useState(false);
 
   // Debounced search
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -389,6 +391,17 @@ export default function EventDiscoveryPage() {
                 </span>
               )}
             </button>
+
+            <AccessibleTooltip content="Ver tutorial">
+              <button
+                type="button"
+                className="btn-help-video btn-help-video--sm"
+                onClick={() => setShowHelp(true)}
+                aria-label="Ver tutorial de búsqueda y filtros"
+              >
+                ❓
+              </button>
+            </AccessibleTooltip>
 
             {filters.solo_accesibles && (
               <span className="filter-chip">
@@ -568,6 +581,24 @@ export default function EventDiscoveryPage() {
           )}
         </div>
       </main>
+      {showHelp && (
+        <HelpVideoModal
+          videoSrc="/videos/IngresarAEvento.mp4"
+          videoVtt="/videos/IngresarAEvento.vtt"
+          title="Explorar Eventos"
+          description="Se muestra cómo el usuario común hace el proceso de ingresar y registrarse a un evento gratuito."
+          transcription={
+            <>
+              <p><strong className="text-foreground">0:00</strong> Una vez que el usuario haya iniciado sesión en la página, tendremos la sección "Descubrir eventos".</p>
+              <p><strong className="text-foreground">0:12</strong> Aquí estarán todos los eventos disponibles: hay eventos de pago y eventos gratuitos. Al seleccionar uno gratuito, se muestra la información del evento.</p>
+              <p><strong className="text-foreground">0:24</strong> Podemos ver la ubicación en Google Maps, la descripción de la actividad y la fecha de inicio.</p>
+              <p><strong className="text-foreground">0:42</strong> Luego aceptamos los términos y seleccionamos el tipo de entrada.</p>
+              <p><strong className="text-foreground">1:04</strong> Finalmente obtenemos la confirmación y podemos ver el boleto, con el cual podremos entrar al evento.</p>
+            </>
+          }
+          onClose={() => setShowHelp(false)}
+        />
+      )}
     </>
   );
 }

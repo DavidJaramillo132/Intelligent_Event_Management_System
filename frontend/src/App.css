@@ -334,3 +334,37 @@
     color: #A78BFA;
   }
 }
+
+/* ── Botón de ayuda para video tutorial (❓) ─────────────────────────── */
+.btn-help-video {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #6366f1, #8b5cf6);
+  color: #fff;
+  font-size: 1.1rem;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 2px 12px rgba(99, 102, 241, 0.4);
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.btn-help-video:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 20px rgba(99, 102, 241, 0.6);
+}
+
+.btn-help-video:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.btn-help-video--sm {
+  width: 28px;
+  height: 28px;
+  font-size: 0.9rem;
+}

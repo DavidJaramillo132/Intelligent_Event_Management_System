@@ -390,22 +390,24 @@ function HomePage() {
                 Video destacado
               </p>
               <h2 className="mt-2 text-3xl font-bold tracking-tight text-foreground md:text-4xl">
-                Vive la experiencia
+                Accesibilidad en acción
               </h2>
               <p className="mt-3 text-base leading-relaxed text-muted-foreground">
-                Mira cómo se vivió nuestro último evento corporativo. Organiza el tuyo con EventosPro.
+                Te mostramos las opcines de accesibilidad que tiene la pagina EventosPro.
               </p>
             </div>
 
-            <div className="relative aspect-video overflow-hidden rounded-2xl shadow-xl">
-              <iframe
-                src="https://www.youtube.com/embed/OWWJPNIX0V0"
-                title="Video corporativo - 25 Aniversario GTT (Alicante) - Ejemplo de evento gestionado con EventosPro"
-                allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
+            <figure className="relative aspect-video overflow-hidden rounded-2xl shadow-xl bg-black">
+              <video
+                controls
                 className="absolute inset-0 h-full w-full"
-              />
-            </div>
+                poster="/videos/Accesibilidad-poster.jpg"
+                aria-label="Video promocional de accesibilidad en EventosPro"
+              >
+                <source src="/videos/Accesibilidad.mp4" type="video/mp4" />
+                <track kind="captions" src="/videos/Accesibilidad.vtt" srcLang="es" label="Español" default />
+              </video>
+            </figure>
 
             <details className="mt-6 rounded-xl border border-border bg-muted/20 p-4">
               <summary className="cursor-pointer font-medium text-foreground">
@@ -414,35 +416,19 @@ function HomePage() {
               <div className="mt-3 space-y-4 text-sm text-muted-foreground">
                 <div>
                   <h3 className="font-semibold text-foreground mb-2">Descripción</h3>
-                  <p>El video muestra el evento del 25 aniversario de GTT en Alicante: recepción de asistentes, keynote principal, sesiones de networking y cierre del evento. La información visual (escenario, asistentes, logotipos) es decorativa y no añade contenido adicional al audio principal.</p>
+                  <p>Se muestran las opciones de accesibilidad que tiene la página.</p>
                 </div>
                 <div>
                   <h3 className="font-semibold text-foreground mb-2">Transcripción</h3>
                   <div className="space-y-1 text-xs leading-relaxed">
-                    <p><strong className="text-foreground">0:11</strong> Realmente es una satisfacción muy grande poder tenernos aquí a todos juntos hoy y sobre todo no olvidemos lo importante que es tener en cuenta nuestros principios, recordando de dónde venimos, quiénes somos, quién, en definitiva, nuestros orígenes.</p>
-                    <p><strong className="text-foreground">0:35</strong> Ninguna compañía se mantiene a flote durante 25 años en una sólida base de clientes y desde aquí tenemos que agradecerles su confianza y su credibilidad.</p>
-                    <p><strong className="text-foreground">0:46</strong> Somos los referentes en el ámbito de la tecnología tributaria.</p>
-                    <p><strong className="text-foreground">0:54</strong> El gran impulso de realizar todo lo que hemos hecho es esas ganas de transformar la sociedad, de mejorar la sociedad y eso, destinados al ciudadano, porque es la esencia de nuestro trabajo.</p>
-                    <p><strong className="text-foreground">1:08</strong> Me gustaría que se incorporase Paco de la Torre, que yo sin Paco de la Torre no hubiese sido capaz de hacer esto, gracias.</p>
-                    <p><strong className="text-foreground">1:18</strong> Yo creo que nunca hemos tenido miedo a nada, nunca, y nunca hemos tenido la sensación de fracaso o de que nos podía ir mal, jamás, nunca.</p>
-                    <p><strong className="text-foreground">1:29</strong> Yo no tengo ninguna duda de que GTT es la mejor empresa del mundo. El día que todos vosotros tengáis constancia y tengáis la seguridad de que trabajáis en la mejor empresa del mundo, GTT realmente será la mejor empresa del mundo.</p>
-                    <p><strong className="text-foreground">1:52</strong> Ahora mismo estamos aquí 900 y pico personas viéndonos y todos pendientes de todos nosotros, pero hoy es vuestro día y que pasen, por favor, Alicia.</p>
-                    <p><strong className="text-foreground">2:10</strong> [Música]</p>
-                    <p><strong className="text-foreground">2:32</strong> Tenemos que sentirnos muy orgullosos, tenemos un futuro impresionante por delante como se está demostrando, disfrutemos.</p>
+                    <p><strong className="text-foreground">0:00</strong> En la página, en la parte superior derecha, encontramos un panel de accesibilidad.</p>
+                    <p><strong className="text-foreground">0:08</strong> Si hacemos clic ahí, podemos encontrar diferentes acciones de accesibilidad: desde el tamaño normal, grande y extra grande.</p>
+                    <p><strong className="text-foreground">0:16</strong> El alto contraste, el modo oscuro, el cursor, reducir las animaciones y espaciar amplio entre letras.</p>
+                    <p><strong className="text-foreground">0:33</strong> También tenemos el sonido de confirmación que suena al registrarse en un evento.</p>
+                    <p><strong className="text-foreground">0:43</strong> También tenemos el tiempo de sesión ilimitada: si se permanece un minuto sin actividad, la sesión se cierra automáticamente.</p>
+                    <p><strong className="text-foreground">0:55</strong> También en el apartado del teclado, si hacemos clic, nos saldrá el panel con los atajos hacia las diferentes páginas.</p>
                   </div>
                 </div>
-                <p className="text-xs pt-2 border-t border-border/40">
-                  No se requiere audiodescripción adicional. Subtítulos disponibles en el reproductor de YouTube (botón CC). También puedes{' '}
-                  <a
-                    href="https://www.youtube.com/watch?v=OWWJPNIX0V0"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-primary hover:underline"
-                    aria-label="Ver en YouTube (se abre en nueva ventana)"
-                  >
-                    verlo directamente en YouTube ↗
-                  </a>
-                </p>
               </div>
             </details>
           </div>
