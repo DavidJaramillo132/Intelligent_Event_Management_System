@@ -36,3 +36,20 @@ func (r *Repository) ExisteCorreo(correo string) bool {
 	db.GetDB().Model(&models.Usuario{}).Where("correo_electronico = ?", correo).Count(&count)
 	return count > 0
 }
+
+func (r *Repository) ActualizarPerfil(u *models.Usuario) error {
+	return db.GetDB().Model(&models.Usuario{}).
+		Where("id = ?", u.ID).
+		Updates(map[string]interface{}{
+			"nombre":    u.Nombre,
+			"telefono":  u.Telefono,
+			"ciudad":    u.Ciudad,
+			"provincia": u.Provincia,
+		}).Error
+}
+
+func (r *Repository) ActualizarContrasena(id string, hash string) error {
+	return db.GetDB().Model(&models.Usuario{}).
+		Where("id = ?", id).
+		Update("contrasena_hash", hash).Error
+}

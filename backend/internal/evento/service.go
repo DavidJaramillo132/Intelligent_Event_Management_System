@@ -45,6 +45,7 @@ func (s *Service) Crear(input CrearEventoInput) (*EventoResponse, error) {
 		FinRegistro:     input.FinRegistro,
 		Costo:           input.Costo,
 		Estado:          "borrador",
+		ImagenPortada:   input.ImagenPortada,
 	}
 
 	if input.LugarID != nil {
@@ -72,6 +73,19 @@ func (s *Service) ObtenerPorID(id string) (*EventoResponse, error) {
 
 func (s *Service) ListarTodos() ([]EventoResponse, error) {
 	eventos, err := s.repo.ListarTodos()
+	if err != nil {
+		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error listando eventos")
+	}
+
+	var resp []EventoResponse
+	for _, e := range eventos {
+		resp = append(resp, *toResponse(e))
+	}
+	return resp, nil
+}
+
+func (s *Service) ListarConFiltros(filtros FiltrosEvento) ([]EventoResponse, error) {
+	eventos, err := s.repo.ListarConFiltros(filtros)
 	if err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error listando eventos")
 	}
@@ -139,6 +153,9 @@ func (s *Service) Actualizar(id string, input ActualizarEventoInput) (*EventoRes
 	if input.Estado != nil {
 		e.Estado = *input.Estado
 	}
+	if input.ImagenPortada != nil {
+		e.ImagenPortada = *input.ImagenPortada
+	}
 
 	if err := s.repo.Actualizar(e); err != nil {
 		return nil, fiber.NewError(fiber.StatusInternalServerError, "Error actualizando el evento")
@@ -171,14 +188,30 @@ func toResponse(e models.Evento) *EventoResponse {
 		Capacidad:      e.Capacidad,
 		Costo:          e.Costo,
 		Estado:         e.Estado,
+		ImagenPortada:  e.ImagenPortada,
 		CreadoEn:       e.CreadoEn.Format("2006-01-02T15:04:05Z07:00"),
 		ActualizadoEn:  e.ActualizadoEn.Format("2006-01-02T15:04:05Z07:00"),
 	}
 
-	if e.LugarID != nil {
+	// Tipo de evento nombre
+	if e.TipoEvento.ID != 0 {
+		resp.TipoEventoNombre = e.TipoEvento.Nombre
+	}
+
+	// Lugar y accesibilidad
+	if e.Lugar != nil {
+		lid := e.Lugar.ID.String()
+		resp.LugarID = &lid
+		resp.LugarNombre = e.Lugar.Nombre
+		resp.LugarDireccion = e.Lugar.Direccion
+		resp.LugarCiudad = e.Lugar.Ciudad
+		resp.AccesibilidadFisica = e.Lugar.AccesibilidadFisica
+		resp.AccesibilidadSensorial = e.Lugar.AccesibilidadSensorial
+	} else if e.LugarID != nil {
 		lid := e.LugarID.String()
 		resp.LugarID = &lid
 	}
+
 	if e.InicioRegistro != nil {
 		ir := e.InicioRegistro.Format("2006-01-02T15:04:05Z07:00")
 		resp.InicioRegistro = &ir
@@ -189,4 +222,26 @@ func toResponse(e models.Evento) *EventoResponse {
 	}
 
 	return resp
+}
+
+// StatsEvento reúne métricas de check-ins e inscripciones para un evento
+func (s *Service) StatsEvento(eventoID string) map[string]interface{} {
+	checkins := s.repo.ContarCheckins(eventoID)
+	inscripciones := s.repo.ContarInscripciones(eventoID)
+	e, _ := s.repo.BuscarPorID(eventoID)
+	var capacidad int64
+	var pct float64
+	if e != nil {
+		capacidad = int64(e.Capacidad)
+		if capacidad > 0 {
+			raw := float64(checkins) / float64(capacidad) * 100
+			pct = float64(int(raw*10)) / 10
+		}
+	}
+	return map[string]interface{}{
+		"checkins":      checkins,
+		"inscripciones": inscripciones,
+		"capacidad":     capacidad,
+		"pct_ocupacion": pct,
+	}
 }

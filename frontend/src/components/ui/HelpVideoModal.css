@@ -1,0 +1,107 @@
+.help-video-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(4px);
+  padding: 1rem;
+}
+
+.help-video-panel {
+  background: var(--color-surface, #fff);
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+  max-width: 900px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.help-video-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.help-video-panel__title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-text, #111);
+  margin: 0;
+}
+
+.help-video-panel__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 9999px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-muted);
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.help-video-panel__close:hover {
+  background: var(--color-border);
+}
+
+.help-video-panel__close:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.help-video-panel__body {
+  padding: 1.5rem;
+}
+
+.help-video-panel__video-wrap {
+  margin: 0;
+  border-radius: 0.75rem;
+  overflow: hidden;
+  background: #000;
+}
+
+.help-video-panel__video {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+}
+
+.help-video-panel__transcript {
+  margin-top: 1rem;
+  border: 1px solid var(--color-border);
+  border-radius: 0.75rem;
+  background: var(--color-muted, #f8f8f8);
+  padding: 1rem;
+}
+
+.help-video-panel__transcript summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.help-video-panel__transcript-body {
+  margin-top: 0.75rem;
+  font-size: 0.875rem;
+  color: var(--color-text-muted);
+  line-height: 1.6;
+}
+
+.help-video-panel__transcript-body p {
+  margin: 0;
+  white-space: pre-wrap;
+}

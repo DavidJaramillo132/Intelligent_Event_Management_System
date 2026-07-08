@@ -45,9 +45,38 @@ func (h *Handler) ObtenerPorID(c *fiber.Ctx) error {
 	})
 }
 
-// GET /api/v1/eventos
+// GET /api/v1/eventos  — soporta query params de búsqueda/filtrado
 func (h *Handler) Listar(c *fiber.Ctx) error {
-	resp, err := h.service.ListarTodos()
+	filtros := FiltrosEvento{
+		Q:              c.Query("q"),
+		TipoEventoID:   c.Query("tipo_evento_id"),
+		FechaInicio:    c.Query("fecha_inicio"),
+		FechaFin:       c.Query("fecha_fin"),
+		CostoMin:       c.Query("costo_min"),
+		CostoMax:       c.Query("costo_max"),
+		SoloAccesibles: c.Query("solo_accesibles") == "true",
+	}
+
+	// Si no hay ningún filtro activo, usamos el listing simple
+	hayFiltros := filtros.Q != "" ||
+		filtros.TipoEventoID != "" ||
+		filtros.FechaInicio != "" ||
+		filtros.FechaFin != "" ||
+		filtros.CostoMin != "" ||
+		filtros.CostoMax != "" ||
+		filtros.SoloAccesibles
+
+	var (
+		resp []EventoResponse
+		err  error
+	)
+
+	if hayFiltros {
+		resp, err = h.service.ListarConFiltros(filtros)
+	} else {
+		resp, err = h.service.ListarTodos()
+	}
+
 	if err != nil {
 		return err
 	}
@@ -104,5 +133,17 @@ func (h *Handler) Eliminar(c *fiber.Ctx) error {
 	return c.JSON(fiber.Map{
 		"ok":      true,
 		"message": "Evento eliminado correctamente",
+	})
+}
+
+// GET /api/v1/eventos/:id/stats
+func (h *Handler) Stats(c *fiber.Ctx) error {
+	id := c.Params("id")
+
+	stats := h.service.StatsEvento(id)
+
+	return c.JSON(fiber.Map{
+		"ok":   true,
+		"data": stats,
 	})
 }

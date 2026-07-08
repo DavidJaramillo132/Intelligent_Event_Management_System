@@ -19,7 +19,7 @@ func (h *Handler) Register(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "JSON inválido")
 	}
 
-	resp, err := h.service.Registrar(input)
+	resp, err := h.service.Registrar(input, c.IP())
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func (h *Handler) Login(c *fiber.Ctx) error {
 		return fiber.NewError(fiber.StatusBadRequest, "JSON inválido")
 	}
 
-	resp, err := h.service.Login(input)
+	resp, err := h.service.Login(input, c.IP())
 	if err != nil {
 		return err
 	}
@@ -66,4 +66,75 @@ func (h *Handler) Refresh(c *fiber.Ctx) error {
 		"ok":   true,
 		"data": resp,
 	})
+}
+
+func (h *Handler) ObtenerPerfil(c *fiber.Ctx) error {
+	usuarioID, ok := c.Locals("usuario_id").(string)
+	if !ok || usuarioID == "" {
+		return fiber.NewError(fiber.StatusUnauthorized, "Usuario no autenticado")
+	}
+
+	perfil, err := h.service.ObtenerPerfil(usuarioID)
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(fiber.Map{
+		"ok":   true,
+		"data": perfil,
+	})
+}
+
+func (h *Handler) ActualizarPerfil(c *fiber.Ctx) error {
+	usuarioID, ok := c.Locals("usuario_id").(string)
+	if !ok || usuarioID == "" {
+		return fiber.NewError(fiber.StatusUnauthorized, "Usuario no autenticado")
+	}
+
+	var input UpdateProfileInput
+	if err := c.BodyParser(&input); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "JSON invalido")
+	}
+
+	perfil, err := h.service.ActualizarPerfil(usuarioID, input, c.IP())
+	if err != nil {
+		return writeFieldError(c, err)
+	}
+
+	return c.JSON(fiber.Map{
+		"ok":   true,
+		"data": perfil,
+	})
+}
+
+func (h *Handler) CambiarContrasena(c *fiber.Ctx) error {
+	usuarioID, ok := c.Locals("usuario_id").(string)
+	if !ok || usuarioID == "" {
+		return fiber.NewError(fiber.StatusUnauthorized, "Usuario no autenticado")
+	}
+
+	var input ChangePasswordInput
+	if err := c.BodyParser(&input); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "JSON invalido")
+	}
+
+	if err := h.service.CambiarContrasena(usuarioID, input, c.IP()); err != nil {
+		return writeFieldError(c, err)
+	}
+
+	return c.JSON(fiber.Map{
+		"ok":      true,
+		"message": "Contrasena actualizada",
+	})
+}
+
+func writeFieldError(c *fiber.Ctx, err error) error {
+	if e, ok := err.(*FieldError); ok {
+		return c.Status(e.Status).JSON(fiber.Map{
+			"ok":      false,
+			"message": e.Message,
+			"field":   e.Field,
+		})
+	}
+	return err
 }

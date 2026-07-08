@@ -1,0 +1,272 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   MÓDULO ADMINISTRADOR — Auditoría del Sistema
+   Hereda variables y componentes de GestionUsuarios.css.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* Reutiliza .admin-page__header, .admin-stat, .admin-loading, etc. */
+@import './GestionUsuarios.css';
+
+/* ── Página de auditoría ─────────────────────────────────────────────────── */
+.audit-page {
+  padding: 2rem 1rem 4rem;
+  min-height: 100vh;
+  background: var(--color-bg, #f8f9fa);
+}
+
+.audit-page__summary {
+  text-align: center;
+  color: #6b7280;
+  font-size: 0.85rem;
+  margin-top: 0.75rem;
+}
+
+/* ── Panel de filtros ────────────────────────────────────────────────────── */
+.audit-filters {
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  padding: 1.25rem;
+  margin-bottom: 1.25rem;
+}
+
+.audit-filters__title {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0 0 0.875rem;
+}
+
+.audit-filters__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.875rem;
+  margin-bottom: 1rem;
+}
+
+.audit-filters__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.audit-filters__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: #374151;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.audit-filters__input {
+  padding: 0.45rem 0.75rem;
+  border: 1.5px solid #d1d5db;
+  border-radius: 0.375rem;
+  font-size: 0.9rem;
+  color: #111827;
+  background: #fff;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+
+.audit-filters__input:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
+}
+
+.audit-filters__actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* ── Tabla de logs ───────────────────────────────────────────────────────── */
+.audit-table-wrap {
+  overflow-x: auto;
+  background: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.5rem;
+  margin-bottom: 1.25rem;
+  max-height: 65vh;
+  overflow-y: auto;
+}
+
+.audit-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.875rem;
+  table-layout: fixed;
+}
+
+/* Columnas con anchos fijos para alta densidad */
+.audit-table colgroup col:nth-child(1) { width: 180px; }
+.audit-table colgroup col:nth-child(2) { width: 130px; }
+.audit-table colgroup col:nth-child(3) { width: 200px; }
+.audit-table colgroup col:nth-child(4) { width: 140px; }
+.audit-table colgroup col:nth-child(5) { width: auto;   }
+
+.audit-table thead {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+}
+
+.audit-table thead tr {
+  background: #1e293b;
+}
+
+.audit-table th {
+  padding: 0.65rem 0.875rem;
+  text-align: left;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #e2e8f0;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  white-space: nowrap;
+}
+
+.audit-table tbody tr {
+  border-bottom: 1px solid #f1f5f9;
+  transition: background 0.08s;
+}
+
+.audit-table tbody tr:hover {
+  background: #f8fafc;
+}
+
+.audit-table tbody tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.audit-table tbody tr:nth-child(even):hover {
+  background: #f0f7ff;
+}
+
+.audit-table td {
+  padding: 0.55rem 0.875rem;
+  vertical-align: top;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ── Celdas específicas ──────────────────────────────────────────────────── */
+.audit-table__time {
+  white-space: nowrap;
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: #475569;
+}
+
+.audit-table__ip code {
+  font-family: 'Courier New', monospace;
+  font-size: 0.8rem;
+  color: #0f172a;
+  background: #f1f5f9;
+  padding: 0.1rem 0.35rem;
+  border-radius: 0.2rem;
+}
+
+.audit-table__user {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+}
+
+.audit-table__email {
+  font-size: 0.85rem;
+  color: #1e40af;
+  word-break: break-all;
+}
+
+.audit-table__uid {
+  font-size: 0.72rem;
+  color: #94a3b8;
+  font-family: monospace;
+}
+
+.audit-table__desc {
+  font-size: 0.83rem;
+  color: #475569;
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* ── Badges de acción ────────────────────────────────────────────────────── */
+.audit-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.audit-badge--login         { background: #dbeafe; color: #1e40af; }
+.audit-badge--registro      { background: #d1fae5; color: #065f46; }
+.audit-badge--cambio        { background: #fef3c7; color: #92400e; }
+.audit-badge--activacion    { background: #dcfce7; color: #166534; }
+.audit-badge--desactivacion { background: #fee2e2; color: #991b1b; }
+.audit-badge--aprobacion    { background: #ede9fe; color: #5b21b6; }
+.audit-badge--default       { background: #f3f4f6; color: #374151; }
+
+/* ── Responsive ──────────────────────────────────────────────────────────── */
+@media (max-width: 900px) {
+  .audit-table-wrap {
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  .audit-table thead {
+    display: none;
+  }
+
+  .audit-table tbody tr {
+    display: block;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    margin-bottom: 0.75rem;
+    padding: 0.75rem;
+    background: #fff;
+  }
+
+  .audit-table td {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    padding: 0.3rem 0;
+    border: none;
+    overflow: visible;
+    white-space: normal;
+  }
+
+  .audit-table td::before {
+    content: attr(data-label) ": ";
+    font-weight: 700;
+    font-size: 0.75rem;
+    color: #64748b;
+    min-width: 7rem;
+    flex-shrink: 0;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+  }
+
+  .audit-table__user {
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.35rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .audit-filters__grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -10,6 +10,7 @@ type RegisterInput struct {
 	Ciudad            string `json:"ciudad"`
 	Provincia         string `json:"provincia"`
 	Pais              string `json:"pais"`
+	Rol               string `json:"rol"`
 }
 
 type LoginInput struct {
@@ -34,4 +35,17 @@ type UsuarioPublico struct {
 	Provincia         string `json:"provincia,omitempty"`
 	Pais              string `json:"pais"`
 	Telefono          string `json:"telefono,omitempty"`
+}
+
+type UpdateProfileInput struct {
+	Nombre    string `json:"nombre"`
+	Telefono  string `json:"telefono"`
+	Ciudad    string `json:"ciudad"`
+	Provincia string `json:"provincia"`
+}
+
+type ChangePasswordInput struct {
+	ContrasenaActual    string `json:"contrasena_actual"`
+	NuevaContrasena     string `json:"nueva_contrasena"`
+	ConfirmarContrasena string `json:"confirmar_contrasena"`
 }

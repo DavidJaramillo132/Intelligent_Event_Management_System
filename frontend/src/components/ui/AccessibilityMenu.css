@@ -1,0 +1,327 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACCESSIBILITY MENU — Floating WCAG 2.2 Controls
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.a11y-menu {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  z-index: var(--z-accessibility, 9999);
+}
+
+.a11y-menu__trigger {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-radius: 50%;
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.a11y-menu__trigger:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-xl);
+}
+
+.a11y-menu__trigger:focus-visible {
+  outline: 3px solid var(--color-primary-light);
+  outline-offset: 3px;
+}
+
+.a11y-menu__panel {
+  position: fixed;
+  bottom: 6rem;
+  right: 1.5rem;
+  width: 22rem;
+  max-width: calc(100vw - 2rem);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xl);
+  padding: var(--space-5) var(--space-5) var(--space-6);
+  box-shadow: var(--shadow-xl);
+  max-height: calc(100svh - 8rem);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  z-index: 99999;
+}
+
+.a11y-menu__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-4);
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.a11y-menu__title {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  margin: 0;
+  color: var(--color-text);
+}
+
+.a11y-menu__close {
+  background: none;
+  border: 1px solid var(--color-border);
+  cursor: pointer;
+  color: var(--color-text-muted);
+  font-size: 1rem;
+  line-height: 1;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color var(--transition-fast), background var(--transition-fast);
+  min-width: 2rem;
+  min-height: 2rem;
+}
+
+.a11y-menu__close:hover {
+  color: var(--color-text);
+  background: var(--color-primary-surface);
+  border-color: var(--color-primary-border);
+}
+
+.a11y-menu__close:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.a11y-menu__group {
+  margin-bottom: var(--space-4);
+}
+
+.a11y-menu__group-label {
+  display: block;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: var(--space-3);
+}
+
+/* ── Font Size Chips (reemplaza radio buttons problemáticos) ──────────── */
+.a11y-font-chips {
+  display: flex;
+  gap: var(--space-2);
+}
+
+.a11y-font-chip {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: var(--space-2) var(--space-3);
+  border: 2px solid var(--color-border-strong);
+  border-radius: var(--radius-md);
+  background: var(--color-surface);
+  color: var(--color-text);
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  min-height: 3.5rem;
+  font-family: var(--font-family);
+}
+
+.a11y-font-chip:hover {
+  border-color: var(--color-primary);
+  background: var(--color-primary-surface);
+  color: var(--color-primary);
+}
+
+.a11y-font-chip:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.a11y-font-chip--active {
+  border-color: var(--color-primary) !important;
+  background: var(--color-primary) !important;
+  color: #ffffff !important;
+  box-shadow: var(--shadow-glow);
+}
+
+.a11y-font-chip__letter {
+  font-weight: 700;
+  line-height: 1;
+  font-size: 1rem;
+}
+
+.a11y-font-chip__desc {
+  font-size: 0.65rem;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  opacity: 0.85;
+}
+
+/* ── Toggle switches ──────────────────────────────────────────────────── */
+.a11y-menu__toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-3) 0;
+  font-size: var(--font-size-sm);
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  border-bottom: 1px solid var(--color-border);
+  gap: var(--space-3);
+}
+
+.a11y-menu__toggle:last-of-type {
+  border-bottom: none;
+}
+
+/* El switch custom — visible en ambos modos */
+.a11y-menu__toggle input[type="checkbox"] {
+  /* Sobreescribe el estilo global de index.css para este contexto */
+  appearance: none !important;
+  -webkit-appearance: none !important;
+  width: 2.75rem !important;
+  height: 1.5rem !important;
+  min-width: 2.75rem;
+  border-radius: var(--radius-full) !important;
+  border: 2px solid var(--color-border-strong) !important;
+  background: var(--color-disabled-bg) !important;
+  background-image: none !important;
+  position: relative;
+  cursor: pointer;
+  transition: background var(--transition-fast), border-color var(--transition-fast);
+  flex-shrink: 0;
+  box-shadow: inset 0 1px 3px rgba(0,0,0,0.15);
+}
+
+/* La bolita del switch */
+.a11y-menu__toggle input[type="checkbox"]::after {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 1rem;
+  height: 1rem;
+  background: white;
+  border-radius: 50%;
+  transition: transform var(--transition-fast);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+}
+
+.a11y-menu__toggle input[type="checkbox"]:checked {
+  background: var(--color-primary) !important;
+  border-color: var(--color-primary) !important;
+}
+
+.a11y-menu__toggle input[type="checkbox"]:checked::after {
+  transform: translateX(1.25rem);
+}
+
+.a11y-menu__toggle input[type="checkbox"]:focus-visible {
+  outline: 3px solid var(--color-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-full);
+}
+
+/* Modo oscuro — bolita más visible */
+:root.dark-mode .a11y-menu__toggle input[type="checkbox"]::after,
+.dark .a11y-menu__toggle input[type="checkbox"]::after {
+  background: #e2e8f0;
+}
+
+.a11y-menu__reset {
+  width: 100%;
+  margin-top: var(--space-3);
+}
+
+/* ── Responsive (WCAG 1.4.10 Reflow) ─────────────────────────────────────── */
+@media (max-width: 640px) {
+  .a11y-menu {
+    bottom: var(--space-4);
+    right: var(--space-4);
+  }
+
+  .a11y-menu__trigger {
+    width: 3rem;
+    height: 3rem;
+    font-size: 1.25rem;
+  }
+
+  /* Panel ocupa casi toda la pantalla en móvil */
+  .a11y-menu__panel {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    width: 100%;
+    max-width: 100%;
+    max-height: 85vh;
+    border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+    padding: var(--space-4) var(--space-4) calc(var(--space-4) + env(safe-area-inset-bottom));
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    box-shadow: 0 -4px 24px rgba(0,0,0,.2);
+  }
+
+  /* Drag handle */
+  .a11y-menu__panel::before {
+    content: '';
+    display: block;
+    width: 2.5rem;
+    height: 4px;
+    border-radius: var(--radius-full);
+    background: var(--color-border-strong);
+    margin: 0 auto var(--space-4);
+  }
+
+  .a11y-menu__title {
+    font-size: var(--font-size-base);
+    text-align: center;
+  }
+
+  .a11y-font-chips {
+    gap: var(--space-3);
+  }
+
+  .a11y-font-chip {
+    min-height: 4rem;
+  }
+
+  .a11y-menu__toggle {
+    padding: var(--space-3) 0;
+    font-size: var(--font-size-base);
+  }
+
+  .a11y-menu__toggle input[type="checkbox"] {
+    width: 3rem !important;
+    height: 1.625rem !important;
+    min-width: 3rem;
+  }
+
+  .a11y-menu__toggle input[type="checkbox"]::after {
+    width: 1.125rem;
+    height: 1.125rem;
+  }
+
+  .a11y-menu__toggle input[type="checkbox"]:checked::after {
+    transform: translateX(1.375rem);
+  }
+
+  .a11y-menu__reset {
+    margin-top: var(--space-4);
+    padding: var(--space-3);
+    font-size: var(--font-size-base);
+  }
+}
+
+/* Very small screens (< 375px) */
+@media (max-width: 374px) {
+  .a11y-menu__panel {
+    max-height: 82vh;
+    padding: var(--space-3) var(--space-3) calc(var(--space-3) + env(safe-area-inset-bottom));
+  }
+}

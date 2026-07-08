@@ -23,8 +23,8 @@ services:
         - pg_isready -U ${POSTGRES_USER:-eventos_user} -d ${POSTGRES_DB:-eventos_db}
       interval: 10s
       timeout: 5s
-      retries: 5
-      start_period: 10s
+      retries: 10
+      start_period: 30s
     deploy:
       resources:
         limits:
@@ -56,7 +56,7 @@ services:
     container_name: eventos_backend
     restart: unless-stopped
     env_file:
-      - ../backend/env/.env # Load default env vars; override with .env in production
+      - ../backend/.env # Load default env vars; override with .env in production
     environment:
       DATABASE_URL: 
         host=postgres 
@@ -80,7 +80,7 @@ services:
     networks:
       - eventos_net
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:8080/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -97,6 +97,8 @@ services:
     tmpfs:
       - /tmp
       - /run
+    volumes:
+      - uploads_data:/app/uploads
     security_opt:
       - no-new-privileges:true
     logging:
@@ -122,7 +124,7 @@ services:
     networks:
       - eventos_net
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health')"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -156,6 +158,8 @@ services:
     image: frontend:latest
     container_name: eventos_frontend
     restart: unless-stopped
+    volumes:
+      - ../frontend/public/videos:/usr/share/nginx/html/videos:ro
     ports:
       - "127.0.0.1:5174:80"  # Bind to localhost; expose via Nginx in production
     depends_on:
@@ -163,7 +167,7 @@ services:
     networks:
       - eventos_net
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://127.0.0.1:80/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -193,6 +197,8 @@ services:
 # ── Volumes for persistent data ────────────────────────────────────────────────
 volumes:
   postgres_data:
+    driver: local
+  uploads_data:
     driver: local
 
 
