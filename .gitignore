@@ -103,3 +103,6 @@ $RECYCLE.BIN/
 
 #kiro 
 /.kiro
+.env
+env
+envs
