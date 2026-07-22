@@ -8,6 +8,7 @@ from routes import (
     prediccion,
     satisfaccion,
     publico,
+    chat,
 )
 
 app = FastAPI(
@@ -28,6 +29,7 @@ app.add_middleware(
 app.include_router(prediccion.router,     prefix="/ia/prediccion",     tags=["Predicción de asistencia"])
 app.include_router(satisfaccion.router,   prefix="/ia/satisfaccion",   tags=["Análisis de satisfacción"])
 app.include_router(publico.router,        prefix="/ia/publico",        tags=["Análisis de público"])
+app.include_router(chat.router,           prefix="/ia/chat",           tags=["Chat Asistente"])
 
 @app.get("/health")
 def health():

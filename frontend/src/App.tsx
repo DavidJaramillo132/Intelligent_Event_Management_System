@@ -21,6 +21,7 @@ import Footer from './components/layout/Footer';
 import AccessibilityMenu from './components/ui/AccessibilityMenu';
 import AccessibleTooltip from './components/ui/AccessibleTooltip';
 import KeyboardShortcuts from './components/ui/KeyboardShortcuts';
+import ChatBot from './components/ui/ChatBot';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import CreateEventPage from './pages/events/CreateEventPage';
@@ -401,7 +402,6 @@ function HomePage() {
               <video
                 controls
                 className="absolute inset-0 h-full w-full"
-                poster="/videos/Accesibilidad-poster.jpg"
                 aria-label="Video promocional de accesibilidad en EventosPro"
               >
                 <source src="/videos/Accesibilidad.mp4" type="video/mp4" />
@@ -793,6 +793,7 @@ export default function App() {
         </Routes>
 
         <Footer />
+        <ChatBot />
         <AccessibilityMenu />
         <KeyboardShortcuts />
         <ToastContainer />
