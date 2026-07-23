@@ -93,3 +93,14 @@ func (h *Handler) ListarPublicoPorEvento(c *fiber.Ctx) error {
 	if err != nil { return err }
 	return c.JSON(fiber.Map{"ok": true, "data": resp})
 }
+
+// POST /api/v1/ia/chat
+func (h *Handler) Chat(c *fiber.Ctx) error {
+	var input map[string]interface{}
+	if err := c.BodyParser(&input); err != nil {
+		return fiber.NewError(fiber.StatusBadRequest, "JSON inválido")
+	}
+	resp, err := h.service.Chat(input)
+	if err != nil { return err }
+	return c.JSON(resp)
+}

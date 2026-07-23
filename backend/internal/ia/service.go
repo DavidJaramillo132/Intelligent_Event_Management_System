@@ -276,6 +276,10 @@ func (s *Service) ListarPublicoPorEvento(eventoID string) ([]PublicoResponse, er
 	return resp, nil
 }
 
+func (s *Service) Chat(input map[string]interface{}) (map[string]interface{}, error) {
+	return s.iaClient.Chat(input)
+}
+
 func toPublicoResponse(a models.AnalisisPublico) *PublicoResponse {
 	return &PublicoResponse{
 		ID:                       a.ID,

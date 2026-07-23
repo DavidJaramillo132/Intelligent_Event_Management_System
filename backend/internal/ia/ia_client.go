@@ -215,3 +215,32 @@ func (c *IAClient) AnalizarPublico(input IAPublicoRequest) (*IAPublicoResponse, 
 	}
 	return &result, nil
 }
+
+// Chat envía un mensaje al chat asistente y devuelve la respuesta del LLM.
+func (c *IAClient) Chat(input map[string]interface{}) (map[string]interface{}, error) {
+	body, err := json.Marshal(input)
+	if err != nil {
+		return nil, fmt.Errorf("error serializando request: %w", err)
+	}
+
+	resp, err := c.httpClient.Post(
+		fmt.Sprintf("%s/ia/chat/", c.baseURL),
+		"application/json",
+		bytes.NewReader(body),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("error conectando con el servicio de chat: %w", err)
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		respBody, _ := io.ReadAll(resp.Body)
+		return nil, fmt.Errorf("ia-service respondió con status %d: %s", resp.StatusCode, string(respBody))
+	}
+
+	var result map[string]interface{}
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		return nil, fmt.Errorf("error decodificando respuesta de chat: %w", err)
+	}
+	return result, nil
+}

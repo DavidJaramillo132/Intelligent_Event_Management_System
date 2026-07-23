@@ -166,6 +166,9 @@ func Setup(app *fiber.App) {
 	preguntas.Put("/:id", middleware.RolRequerido("organizador", "admin"), encuestaH.ActualizarPregunta)
 	preguntas.Delete("/:id", middleware.RolRequerido("organizador", "admin"), encuestaH.EliminarPregunta)
 
+	// Chat asistente (público, no requiere JWT — el frontend no envía token)
+	api.Post("/ia/chat", iaH.Chat)
+
 	// ── IA (Predicciones + Análisis) ────────────────────────────────────────
 	iaGroup := protected.Group("/ia")
 	// Predicciones

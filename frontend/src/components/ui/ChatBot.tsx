@@ -105,7 +105,8 @@ export default function ChatBot() {
       .map(m => ({ role: m.role, content: m.content }));
 
     try {
-      const res = await fetch('/ia/chat/', {
+      const API_BASE = import.meta.env.VITE_API_URL || '/api/v1';
+      const res = await fetch(`${API_BASE}/ia/chat`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
